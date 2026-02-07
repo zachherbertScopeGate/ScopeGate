@@ -3,187 +3,786 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ScopeGate — Instant Estimate</title>
-  <meta name="description" content="Get an instant electrical estimate. Confirm to send to a contractor." />
+  <title>ScopeGate — Lead-Qualifying Estimate Widget</title>
+  <meta name="description" content="ScopeGate is a plug-and-play estimate widget for contractor websites. Show realistic price ranges up front and only get leads who are comfortable with the number." />
+
   <style>
     :root{
-      --bg:#0b0f1a; --panel:rgba(255,255,255,.06); --line:rgba(255,255,255,.14);
-      --txt:rgba(255,255,255,.92); --mut:rgba(255,255,255,.68);
-      --r:18px; --sh:0 18px 60px rgba(0,0,0,.45); --max:980px;
+      --bg:#0b0f1a;
+      --panel:rgba(255,255,255,.06);
+      --panel2:rgba(255,255,255,.08);
+      --line:rgba(255,255,255,.12);
+      --txt:rgba(255,255,255,.92);
+      --mut:rgba(255,255,255,.68);
+      --mut2:rgba(255,255,255,.55);
+      --brand:#ffb020;
+      --brand2:#ffcc66;
+      --ok:#2fe38d;
+      --bad:#ff5c7a;
+      --r:18px;
+      --shadow:0 18px 60px rgba(0,0,0,.45);
+      --max:1120px;
     }
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
       color:var(--txt);
       background:
-        radial-gradient(1200px 600px at 20% 0%, rgba(72,125,255,.35), transparent 55%),
-        radial-gradient(900px 500px at 80% 10%, rgba(255,155,60,.25), transparent 55%),
+        radial-gradient(1100px 650px at 18% 0%, rgba(72,125,255,.35), transparent 58%),
+        radial-gradient(900px 520px at 82% 12%, rgba(255,155,60,.22), transparent 58%),
+        radial-gradient(700px 520px at 60% 92%, rgba(90,255,190,.12), transparent 58%),
         var(--bg);
       line-height:1.45;
     }
-    .wrap{max-width:var(--max); margin:0 auto; padding:28px 18px 60px;}
-    .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--sh);}
-    header{display:flex; justify-content:space-between; align-items:center; gap:14px; padding:10px 0 22px;}
-    .brand{display:flex; align-items:center; gap:12px; font-weight:800;}
-    .logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,rgba(72,125,255,.95),rgba(255,155,60,.85))}
-    .pill{border:1px solid var(--line); padding:10px 14px; border-radius:999px; background:rgba(255,255,255,.04); color:var(--mut); font-size:14px;}
-    h1{margin:0 0 8px; font-size:clamp(28px,4vw,44px);}
-    .sub{margin:0 0 16px; color:var(--mut);}
-    .grid{display:grid; gap:14px; grid-template-columns:1.1fr .9fr;}
-    @media(max-width:900px){.grid{grid-template-columns:1fr}}
-    .pad{padding:18px;}
-    label{font-size:13px; color:var(--mut);}
-    input,select,textarea{
-      width:100%; padding:12px; border-radius:14px;
-      border:1px solid var(--line); background:rgba(0,0,0,.22);
-      color:var(--txt);
+    a{color:inherit}
+    .wrap{max-width:var(--max); margin:0 auto; padding:28px 18px 90px}
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; padding:10px 0 18px;
     }
-    textarea{min-height:110px;}
-    .row2{display:grid; gap:12px; grid-template-columns:1fr 1fr;}
-    @media(max-width:700px){.row2{grid-template-columns:1fr}}
+    .brand{
+      display:flex; align-items:center; gap:10px; font-weight:700;
+      letter-spacing:.2px;
+    }
+    .logo{
+      width:34px; height:34px; border-radius:12px;
+      background:linear-gradient(135deg, rgba(255,176,32,1), rgba(255,204,102,1));
+      box-shadow:0 10px 30px rgba(255,176,32,.18);
+      position:relative;
+    }
+    .logo:after{
+      content:"";
+      position:absolute; inset:9px;
+      border-radius:10px;
+      background:rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.25);
+    }
+    .pill{
+      font-size:12px; padding:7px 10px; border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.18);
+      color:var(--mut);
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      white-space:nowrap;
+    }
+
+    .hero{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:18px;
+      align-items:stretch;
+    }
+    @media (max-width: 980px){
+      .hero{grid-template-columns:1fr; }
+    }
+
+    .card{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius:var(--r);
+      box-shadow:var(--shadow);
+    }
+    .heroLeft{ padding:26px; }
+    .kicker{
+      color:var(--mut);
+      font-weight:700;
+      letter-spacing:.14em;
+      font-size:12px;
+      text-transform:uppercase;
+    }
+    h1{
+      margin:10px 0 10px;
+      font-size:44px;
+      line-height:1.05;
+      letter-spacing:-.02em;
+    }
+    @media (max-width: 520px){
+      h1{font-size:36px}
+    }
+    .hl{
+      color:var(--brand);
+      text-shadow:0 0 30px rgba(255,176,32,.15);
+    }
+    .lead{
+      margin:12px 0 18px;
+      color:var(--mut);
+      font-size:16px;
+      max-width:56ch;
+    }
+    .ctaRow{
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+      margin-top:14px;
+    }
     .btn{
-      border:0; cursor:pointer;
-      padding:12px 16px; border-radius:14px;
+      appearance:none; border:1px solid var(--line);
+      background:rgba(0,0,0,.22);
+      color:var(--txt);
+      padding:11px 14px;
+      border-radius:12px;
+      font-weight:700;
+      cursor:pointer;
+      transition:transform .08s ease, background .15s ease, border-color .15s ease;
+      display:inline-flex; gap:10px; align-items:center;
+      user-select:none;
+    }
+    .btn:hover{ transform:translateY(-1px); border-color:rgba(255,255,255,.22); background:rgba(255,255,255,.06);}
+    .btn:active{ transform:translateY(0px);}
+    .btnPrimary{
+      border-color:rgba(255,176,32,.45);
+      background:linear-gradient(180deg, rgba(255,176,32,.22), rgba(255,176,32,.10));
+    }
+    .btnPrimary .dot{
+      width:10px; height:10px; border-radius:50%;
+      background:var(--brand);
+      box-shadow:0 0 0 6px rgba(255,176,32,.12);
+    }
+    .tiny{
+      font-size:12px; color:var(--mut2); margin-top:10px;
+    }
+
+    /* Right demo preview */
+    .heroRight{ padding:18px; position:relative; overflow:hidden;}
+    .demoHdr{
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:12px;
+    }
+    .demoTitle{
       font-weight:800;
-      background:linear-gradient(135deg,rgba(72,125,255,.95),rgba(255,155,60,.9));
-      color:#0b0f1a;
+      letter-spacing:-.01em;
     }
-    .btn2{
-      padding:12px 16px; border-radius:14px;
+    .mini{
+      font-size:12px; color:var(--mut);
+    }
+    .flow{
+      display:grid; gap:10px;
+    }
+    .flowBox{
+      border:1px dashed rgba(255,255,255,.18);
+      border-radius:14px;
+      padding:12px;
+      background:rgba(0,0,0,.18);
+    }
+    .flowRow{
+      display:grid; grid-template-columns:1fr 1fr; gap:10px;
+    }
+    @media (max-width: 980px){
+      .flowRow{grid-template-columns:1fr;}
+    }
+    .tag{
+      display:inline-flex; align-items:center; gap:7px;
+      font-size:12px; color:var(--mut);
+      margin-bottom:6px;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+    }
+    .tag .b{
+      width:8px; height:8px; border-radius:50%;
+      background:rgba(255,255,255,.22);
+    }
+    .bul{
+      margin:0; padding-left:18px; color:var(--mut);
+      font-size:13px;
+    }
+    .bul li{ margin:4px 0; }
+
+    .grid3{
+      margin-top:16px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+    }
+    @media (max-width: 980px){ .grid3{grid-template-columns:1fr;} }
+    .feature{
+      padding:14px;
+    }
+    .feature h3{
+      margin:0 0 6px;
+      font-size:14px;
+      letter-spacing:-.01em;
+    }
+    .feature p{margin:0; color:var(--mut); font-size:13px;}
+
+    .section{ margin-top:18px; }
+    .section h2{
+      margin:0 0 10px;
+      font-size:18px;
+      letter-spacing:-.01em;
+    }
+
+    .how{
+      display:grid; gap:10px;
+      grid-template-columns:repeat(3,1fr);
+    }
+    @media (max-width: 980px){ .how{grid-template-columns:1fr;} }
+    .step{ padding:14px; }
+    .step .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:28px; height:28px; border-radius:10px;
+      background:rgba(255,176,32,.16);
+      border:1px solid rgba(255,176,32,.35);
+      font-weight:800;
+      margin-bottom:10px;
+    }
+    .mut{ color:var(--mut); }
+
+    /* Floating widget button + modal */
+    .floatBtn{
+      position:fixed; right:18px; bottom:18px;
+      z-index:50;
+      border:1px solid rgba(255,176,32,.45);
+      background:linear-gradient(180deg, rgba(255,176,32,.25), rgba(255,176,32,.12));
+      color:var(--txt);
+      border-radius:999px;
+      padding:14px 16px;
+      box-shadow:0 20px 55px rgba(0,0,0,.50), 0 10px 30px rgba(255,176,32,.10);
+      cursor:pointer;
+      font-weight:900;
+      letter-spacing:-.01em;
+      display:flex; align-items:center; gap:10px;
+    }
+    .floatBtn:hover{ filter:brightness(1.05); }
+    .floatBtn .zap{
+      width:10px; height:10px; border-radius:50%;
+      background:var(--brand);
+      box-shadow:0 0 0 7px rgba(255,176,32,.12);
+    }
+
+    .modalBackdrop{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.55);
+      display:none;
+      align-items:flex-end;
+      justify-content:flex-end;
+      padding:16px;
+      z-index:100;
+    }
+    .modalBackdrop.open{ display:flex; }
+    .modal{
+      width:min(460px, 100%);
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.14);
+      background:linear-gradient(180deg, rgba(16,20,34,.98), rgba(10,12,22,.98));
+      box-shadow:0 30px 90px rgba(0,0,0,.65);
+      overflow:hidden;
+    }
+    .modalHdr{
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap:12px;
+      padding:14px 14px 10px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+    .modalHdr h3{margin:0; font-size:15px;}
+    .modalHdr p{margin:4px 0 0; color:var(--mut); font-size:12px;}
+    .x{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.06);
-      color:var(--txt); border:1px solid var(--line);
-      font-weight:800; cursor:pointer;
+      color:var(--txt);
+      border-radius:12px;
+      padding:8px 10px;
+      cursor:pointer;
+      font-weight:900;
     }
-    .quoteBox{
-      padding:14px; border-radius:16px;
-      border:1px solid rgba(85,255,190,.35);
-      background:rgba(85,255,190,.08);
+    .modalBody{ padding:12px 14px 14px; }
+    .row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    @media (max-width: 420px){ .row{grid-template-columns:1fr;} }
+    label{ display:block; font-size:12px; color:var(--mut); margin:8px 0 6px; }
+    input, select, textarea{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.22);
+      color:var(--txt);
+      outline:none;
     }
-    .big{font-size:22px; font-weight:900;}
-    .hidden{display:none;}
-    footer{margin-top:22px; text-align:center; color:rgba(255,255,255,.55); font-size:13px;}
+    textarea{ min-height:74px; resize:vertical; }
+    input:focus, select:focus, textarea:focus{
+      border-color:rgba(255,176,32,.40);
+      box-shadow:0 0 0 4px rgba(255,176,32,.10);
+    }
+    .note{ font-size:12px; color:var(--mut2); margin-top:8px; }
+
+    .actions{
+      display:flex; gap:10px; flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .btnWide{ width:100%; justify-content:center; }
+    .btnGreen{
+      border-color:rgba(47,227,141,.40);
+      background:linear-gradient(180deg, rgba(47,227,141,.18), rgba(47,227,141,.08));
+    }
+    .btnGhost{
+      background:rgba(255,255,255,.04);
+    }
+    .estimateBox{
+      margin-top:12px;
+      border:1px dashed rgba(255,255,255,.18);
+      border-radius:14px;
+      padding:12px;
+      background:rgba(0,0,0,.18);
+      display:none;
+    }
+    .estimateBox.show{ display:block; }
+    .estLine{
+      display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+      margin-bottom:6px;
+    }
+    .estBig{
+      font-size:18px; font-weight:900; letter-spacing:-.01em;
+    }
+    .badge{
+      font-size:11px; padding:6px 9px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      color:var(--mut);
+      background:rgba(255,255,255,.05);
+      white-space:nowrap;
+    }
+    .status{
+      margin-top:10px;
+      font-size:12px;
+      color:var(--mut);
+    }
+    .status.ok{ color:rgba(47,227,141,.92); }
+    .status.bad{ color:rgba(255,92,122,.92); }
+
+    /* Footer */
+    .foot{
+      margin-top:22px;
+      color:var(--mut2);
+      font-size:12px;
+      display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    }
   </style>
 </head>
 
 <body>
-<div class="wrap">
-<header>
-  <div class="brand"><div class="logo"></div><div>ScopeGate</div></div>
-  <div class="pill">Estimate → Confirm → Sent</div>
-</header>
-
-<div class="card pad">
-  <h1>Get an instant estimate</h1>
-  <p class="sub">Generate a rough range. Only confirmed quotes are sent to the contractor.</p>
-</div>
-
-<div class="grid" style="margin-top:14px;">
-<div class="card pad">
-  <h2>Step 1 — Project</h2>
-
-  <div class="row2">
-    <div><label>Name</label><input id="name"></div>
-    <div><label>Postal Code</label><input id="postal"></div>
-  </div>
-
-  <div class="row2" style="margin-top:12px;">
-    <div>
-      <label>Project Type</label>
-      <select id="type">
-        <option disabled selected>Select</option>
-        <option value="basement">Basement</option>
-        <option value="panel">Panel Upgrade</option>
-        <option value="ev">EV Charger</option>
-        <option value="lights">Lighting</option>
-        <option value="service">Service Call</option>
-      </select>
-    </div>
-    <div>
-      <label>Access</label>
-      <select id="access">
-        <option value="easy">Easy</option>
-        <option value="normal">Normal</option>
-        <option value="hard">Hard</option>
-      </select>
-    </div>
-  </div>
-
-  <div style="margin-top:12px;">
-    <label>Details</label>
-    <textarea id="details"></textarea>
-  </div>
-
-  <button class="btn" style="margin-top:14px;" id="calc">Generate Estimate</button>
-</div>
-
-<div class="card pad">
-  <h2>Step 2 — Estimate</h2>
-
-  <div id="quote" class="hidden">
-    <div class="quoteBox">
-      <div class="big" id="range"></div>
-    </div>
-
-    <form id="confirmForm"
-      action="https://formspree.io/f/xnjbanbn"
-      method="POST"
-      style="margin-top:14px;"
-    >
-      <label>Email (required to confirm)</label>
-      <input type="email" name="customer_email" required>
-
-      <input type="hidden" name="name" id="h_name">
-      <input type="hidden" name="postal" id="h_postal">
-      <input type="hidden" name="project" id="h_project">
-      <input type="hidden" name="details" id="h_details">
-      <input type="hidden" name="estimate" id="h_estimate">
-      <input type="hidden" name="_subject" value="ScopeGate CONFIRMED Quote">
-
-      <div style="display:flex; gap:12px; margin-top:12px;">
-        <button class="btn" type="submit">Confirm & Send</button>
-        <button class="btn2" type="button" onclick="deny()">Deny</button>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <div style="font-size:14px;">ScopeGate</div>
+          <div style="font-size:12px; color:var(--mut); margin-top:2px;">Estimate widget for contractor websites</div>
+        </div>
       </div>
-    </form>
+      <div class="pill">Early Access • Trades-Focused</div>
+    </div>
+
+    <div class="hero">
+      <div class="card heroLeft">
+        <div class="kicker">BUILT FOR TRADES</div>
+        <h1>
+          Stop wasting time on <span class="hl">unqualified leads</span>.
+        </h1>
+        <div class="lead">
+          ScopeGate is a plug-and-play estimate widget for contractor websites. It shows customers a realistic budget range
+          based on scope — then only sends the lead if they’re comfortable with the number.
+        </div>
+
+        <div class="ctaRow">
+          <button class="btn btnPrimary" id="btnOpenDemo">
+            <span class="dot" aria-hidden="true"></span>
+            Open Demo Widget
+          </button>
+          <a class="btn" href="#how">See how it works</a>
+        </div>
+        <div class="tiny">
+          One file. No build steps. Drop-in widget style demo below (and the floating button is live).
+        </div>
+
+        <div class="grid3">
+          <div class="card feature">
+            <h3>Pre-qualifies before the call</h3>
+            <p>Customers see a range and self-select before you waste a site visit.</p>
+          </div>
+          <div class="card feature">
+            <h3>Captures scope + contact</h3>
+            <p>You get the basics you need: scope, location, timeline, and budget comfort.</p>
+          </div>
+          <div class="card feature">
+            <h3>Feels native on any site</h3>
+            <p>Floating button + modal. Clean. Fast. Doesn’t clutter the page.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card heroRight">
+        <div class="demoHdr">
+          <div>
+            <div class="demoTitle">Example: What the contractor receives</div>
+            <div class="mini">Only sent if the customer confirms they’re comfortable.</div>
+          </div>
+          <div class="pill">Demo Preview</div>
+        </div>
+
+        <div class="flow">
+          <div class="flowRow">
+            <div class="flowBox">
+              <div class="tag"><span class="b"></span>Customer enters</div>
+              <ul class="bul">
+                <li>Name + email</li>
+                <li>Basement size + finish level</li>
+                <li>Ceiling type + bathroom count</li>
+                <li>Timeline + notes</li>
+              </ul>
+            </div>
+            <div class="flowBox">
+              <div class="tag"><span class="b"></span>ScopeGate returns</div>
+              <ul class="bul">
+                <li>Estimated range (low–high)</li>
+                <li>Key cost drivers included</li>
+                <li>Confirm / deny gate</li>
+                <li>Only confirmed leads are sent</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="flowBox">
+            <div class="tag"><span class="b"></span>Contractor email includes</div>
+            <ul class="bul">
+              <li>Customer contact info</li>
+              <li>Location + timeline</li>
+              <li>Scope answers</li>
+              <li>Confirmed budget range</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="how" class="section">
+      <h2>How it works</h2>
+      <div class="how">
+        <div class="card step">
+          <div class="num">1</div>
+          <div style="font-weight:800;">Customer describes the job</div>
+          <div class="mut" style="margin-top:6px; font-size:13px;">Just enough detail to price a realistic range.</div>
+        </div>
+        <div class="card step">
+          <div class="num">2</div>
+          <div style="font-weight:800;">They get a budget range</div>
+          <div class="mut" style="margin-top:6px; font-size:13px;">No surprises. No wasted calls.</div>
+        </div>
+        <div class="card step">
+          <div class="num">3</div>
+          <div style="font-weight:800;">Confirm sends • deny does nothing</div>
+          <div class="mut" style="margin-top:6px; font-size:13px;">Only serious leads reach your inbox.</div>
+        </div>
+      </div>
+
+      <div class="foot">
+        <div>© <span id="yr"></span> ScopeGate • Built for contractors</div>
+        <div>Demo uses your Formspree endpoint for testing.</div>
+      </div>
+    </div>
   </div>
 
-  <div id="placeholder">Generate an estimate first.</div>
-</div>
-</div>
+  <!-- Floating button that opens the working demo widget -->
+  <button class="floatBtn" id="floatBtn" aria-haspopup="dialog" aria-controls="sgModal">
+    <span class="zap" aria-hidden="true"></span>
+    New project? Get a quick range
+  </button>
 
-<footer>© ScopeGate</footer>
-</div>
+  <!-- Modal -->
+  <div class="modalBackdrop" id="backdrop" role="presentation">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="sgTitle" id="sgModal">
+      <div class="modalHdr">
+        <div>
+          <h3 id="sgTitle">Instant Basement Estimate</h3>
+          <p>See a realistic budget range. Confirm only if you’re comfortable.</p>
+        </div>
+        <button class="x" id="btnClose" aria-label="Close">✕</button>
+      </div>
 
-<script>
-const ranges = {
-  basement:[2500,9000],
-  panel:[1800,4500],
-  ev:[900,2600],
-  lights:[600,3500],
-  service:[180,650]
-};
+      <div class="modalBody">
+        <form id="sgForm">
+          <div class="row">
+            <div>
+              <label for="name">Your name</label>
+              <input id="name" name="name" placeholder="John Smith" autocomplete="name" />
+            </div>
+            <div>
+              <label for="postal">Postal code (optional)</label>
+              <input id="postal" name="postal" placeholder="T6E 0R4" />
+            </div>
+          </div>
 
-document.getElementById("calc").onclick = () => {
-  const type = document.getElementById("type").value;
-  if(!ranges[type]) return alert("Select project type");
+          <label for="email">Email (required to confirm & send)</label>
+          <input id="email" name="customer_email" placeholder="you@example.com" autocomplete="email" required />
 
-  const r = ranges[type];
-  const range = `$${r[0].toLocaleString()} – $${r[1].toLocaleString()}`;
+          <div class="row">
+            <div>
+              <label for="sqft">Basement size (sq ft)</label>
+              <input id="sqft" name="sqft" type="number" min="200" max="3000" step="50" value="900" />
+            </div>
+            <div>
+              <label for="finish">Finish level</label>
+              <select id="finish" name="finish">
+                <option value="basic">Basic (budget finish)</option>
+                <option value="standard" selected>Standard (most common)</option>
+                <option value="premium">Premium (high-end)</option>
+              </select>
+            </div>
+          </div>
 
-  document.getElementById("range").textContent = range;
-  document.getElementById("quote").classList.remove("hidden");
-  document.getElementById("placeholder").style.display="none";
+          <div class="row">
+            <div>
+              <label for="ceiling">Ceiling</label>
+              <select id="ceiling" name="ceiling">
+                <option value="open">Open ceiling / easy access</option>
+                <option value="drywall" selected>Drywall ceiling (finished)</option>
+              </select>
+            </div>
+            <div>
+              <label for="bath">Bathroom</label>
+              <select id="bath" name="bathrooms">
+                <option value="0" selected>None</option>
+                <option value="1">1 bathroom</option>
+                <option value="2">2+ bathrooms</option>
+              </select>
+            </div>
+          </div>
 
-  h_name.value = name.value;
-  h_postal.value = postal.value;
-  h_project.value = type;
-  h_details.value = details.value;
-  h_estimate.value = range;
-};
+          <div class="row">
+            <div>
+              <label for="timeline">Timeline</label>
+              <select id="timeline" name="timeline">
+                <option value="asap">ASAP</option>
+                <option value="1-3mo" selected>1–3 months</option>
+                <option value="3-6mo">3–6 months</option>
+                <option value="6mo+">6+ months</option>
+              </select>
+            </div>
+            <div>
+              <label for="extras">Extras</label>
+              <select id="extras" name="extras">
+                <option value="none" selected>None</option>
+                <option value="bar">Bar / kitchenette</option>
+                <option value="theatre">Home theatre</option>
+                <option value="both">Bar + theatre</option>
+              </select>
+            </div>
+          </div>
 
-function deny(){
-  alert("Nothing sent.");
-}
-</script>
+          <label for="notes">Describe the job (optional)</label>
+          <textarea id="notes" name="details" placeholder="Example: 900 sq ft basement finish, 12 pot lights, 2 new circuits, 1 bathroom rough-in."></textarea>
+
+          <div class="note">
+            This is a budget range for pre-qualification. Final quote requires a site visit.
+          </div>
+
+          <div class="actions">
+            <button type="button" class="btn btnPrimary btnWide" id="btnEstimate">
+              Get Estimate
+            </button>
+          </div>
+
+          <div class="estimateBox" id="estimateBox">
+            <div class="estLine">
+              <div class="estBig" id="estValue">$—</div>
+              <div class="badge" id="estBadge">Budget range</div>
+            </div>
+            <div class="mut" style="font-size:12px;">
+              Confirm sends your info to the contractor. Not comfortable does nothing.
+            </div>
+
+            <div class="actions" style="margin-top:10px;">
+              <button type="button" class="btn btnGreen btnWide" id="btnConfirm">
+                Confirm & Send to Contractor
+              </button>
+              <button type="button" class="btn btnGhost btnWide" id="btnDeny">
+                Not comfortable with this range
+              </button>
+            </div>
+
+            <div class="status" id="status"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // === Config ===
+    const FORMSPREE_ENDPOINT = "https://formspree.io/f/xnjbanbn";
+
+    // === Helpers ===
+    const $ = (id) => document.getElementById(id);
+
+    function money(n){
+      return n.toLocaleString("en-CA", { style:"currency", currency:"CAD", maximumFractionDigits:0 });
+    }
+    function roundTo(n, step){
+      return Math.round(n / step) * step;
+    }
+
+    // Simple demo pricing logic (replace later with your real pricing model)
+    function calcRange(){
+      const sqft = Math.max(200, Math.min(3000, Number($("sqft").value || 0)));
+      const finish = $("finish").value;
+      const ceiling = $("ceiling").value;
+      const baths = Number($("bath").value);
+      const extras = $("extras").value;
+
+      // Base $/sqft by finish level
+      let per = 22; // standard baseline
+      if (finish === "basic") per = 16;
+      if (finish === "premium") per = 30;
+
+      // Ceiling access factor
+      let factor = 1.0;
+      if (ceiling === "drywall") factor += 0.12;
+
+      // Bathrooms add complexity
+      let fixed = 0;
+      if (baths === 1) fixed += 6500;
+      if (baths >= 2) fixed += 12000;
+
+      // Extras
+      if (extras === "bar") fixed += 4500;
+      if (extras === "theatre") fixed += 3500;
+      if (extras === "both") fixed += 7500;
+
+      // Compute low/high with variance band
+      const base = sqft * per * factor + fixed;
+
+      // Band widens slightly with size
+      const band = Math.max(3500, Math.min(12000, sqft * 4.5));
+      let low = base - band;
+      let high = base + band;
+
+      // Minimums (prevents silly numbers)
+      low = Math.max(low, 2500);
+      high = Math.max(high, low + 1500);
+
+      // Round nicely
+      low = roundTo(low, 500);
+      high = roundTo(high, 500);
+
+      return { low, high };
+    }
+
+    // === Modal open/close ===
+    const backdrop = $("backdrop");
+    const openers = [$("floatBtn"), $("btnOpenDemo")].filter(Boolean);
+
+    function openModal(){
+      backdrop.classList.add("open");
+      // focus email quickly
+      setTimeout(() => $("email")?.focus(), 50);
+    }
+    function closeModal(){
+      backdrop.classList.remove("open");
+      resetEstimateUI();
+    }
+    function resetEstimateUI(){
+      $("estimateBox").classList.remove("show");
+      $("status").textContent = "";
+      $("status").className = "status";
+      $("estValue").textContent = "$—";
+    }
+
+    openers.forEach(btn => btn.addEventListener("click", openModal));
+    $("btnClose").addEventListener("click", closeModal);
+
+    // Click outside modal closes
+    backdrop.addEventListener("click", (e) => {
+      if (e.target === backdrop) closeModal();
+    });
+
+    // Escape closes
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && backdrop.classList.contains("open")) closeModal();
+    });
+
+    // === Estimate + confirm/deny ===
+    let lastRange = null;
+
+    $("btnEstimate").addEventListener("click", () => {
+      lastRange = calcRange();
+      $("estValue").textContent = `${money(lastRange.low)} – ${money(lastRange.high)}`;
+      $("estimateBox").classList.add("show");
+      $("status").textContent = "";
+      $("status").className = "status";
+    });
+
+    $("btnDeny").addEventListener("click", () => {
+      // Deny = no submit, no popup, nothing. We'll just close.
+      closeModal();
+    });
+
+    $("btnConfirm").addEventListener("click", async () => {
+      const email = $("email").value.trim();
+      if (!email){
+        $("status").textContent = "Email is required to confirm & send.";
+        $("status").className = "status bad";
+        $("email").focus();
+        return;
+      }
+      if (!lastRange){
+        $("status").textContent = "Click “Get Estimate” first.";
+        $("status").className = "status bad";
+        return;
+      }
+
+      $("btnConfirm").disabled = true;
+      $("btnDeny").disabled = true;
+      $("btnEstimate").disabled = true;
+
+      $("status").textContent = "Sending…";
+      $("status").className = "status";
+
+      // Build payload that the contractor receives
+      const payload = {
+        _subject: "ScopeGate CONFIRMED Quote",
+        customer_email: email,
+        name: $("name").value.trim() || "undefined",
+        postal: $("postal").value.trim() || "undefined",
+        sqft: $("sqft").value,
+        finish: $("finish").selectedOptions[0].textContent,
+        ceiling: $("ceiling").selectedOptions[0].textContent,
+        bathrooms: $("bath").selectedOptions[0].textContent,
+        extras: $("extras").selectedOptions[0].textContent,
+        timeline: $("timeline").selectedOptions[0].textContent,
+        details: $("notes").value.trim() || "undefined",
+        estimate: `${money(lastRange.low)} – ${money(lastRange.high)}`,
+        confirmed: "YES"
+      };
+
+      try{
+        const res = await fetch(FORMSPREE_ENDPOINT, {
+          method: "POST",
+          headers: { "Accept":"application/json", "Content-Type":"application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok){
+          throw new Error("Formspree rejected the request.");
+        }
+
+        $("status").textContent = "Sent. The contractor will contact you if it’s a fit.";
+        $("status").className = "status ok";
+
+        // Optional: auto close after a moment
+        setTimeout(() => closeModal(), 900);
+
+      } catch (err){
+        $("status").textContent = "Couldn’t send. Try again in a minute.";
+        $("status").className = "status bad";
+        $("btnConfirm").disabled = false;
+        $("btnDeny").disabled = false;
+        $("btnEstimate").disabled = false;
+        return;
+      }
+    });
+
+    // Year in footer
+    $("yr").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
