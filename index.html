@@ -1,301 +1,856 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ScopeGate Demo</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ScopeGate — Demo Widget</title>
+  <meta name="description" content="ScopeGate: a plug-and-play estimate widget for contractor websites. Show a realistic range, then only send confirmed leads." />
 
-<style>
-:root{
-  --bg:#070a11;
-  --card:#121826;
-  --border:rgba(255,255,255,.12);
-  --text:rgba(255,255,255,.92);
-  --muted:rgba(255,255,255,.65);
-  --accent:#f4a62a;
-  --accent2:#ffbf57;
-  --radius:16px;
-}
+  <style>
+    :root{
+      --bg:#0b0f1a;
+      --panel:rgba(255,255,255,.06);
+      --panel2:rgba(255,255,255,.08);
+      --border:rgba(255,255,255,.14);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.68);
+      --soft:rgba(255,255,255,.10);
+      --shadow:0 18px 60px rgba(0,0,0,.55);
+      --r:18px;
 
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-  color:var(--text);
-  background:
-    radial-gradient(1000px 600px at 20% 10%, rgba(70,130,255,.25), transparent 60%),
-    radial-gradient(900px 600px at 80% 15%, rgba(255,165,0,.18), transparent 60%),
-    var(--bg);
-}
+      --accent:#f3a526; /* warm orange */
+      --accent2:#ffcc6a;
+      --good:#57d67b;
+    }
 
-/* ===== PAGE CONTENT ===== */
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 650px at 16% 10%, rgba(72,125,255,.32), transparent 60%),
+        radial-gradient(950px 520px at 78% 14%, rgba(255,155,60,.25), transparent 62%),
+        radial-gradient(900px 600px at 40% 85%, rgba(120,255,220,.08), transparent 60%),
+        var(--bg);
+      overflow-x:hidden;
+    }
 
-.container{
-  max-width:1000px;
-  margin:120px auto;
-  padding:0 24px;
-}
+    /* subtle noise */
+    body:before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
+      opacity:.22;
+      mix-blend-mode:overlay;
+    }
 
-h1{
-  font-size:42px;
-  margin-bottom:16px;
-}
+    .wrap{
+      max-width:1140px;
+      margin:0 auto;
+      padding:34px 22px 90px;
+      position:relative;
+      z-index:1;
+    }
 
-.cards{
-  display:flex;
-  gap:20px;
-  margin-top:40px;
-}
+    /* header */
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:34px;
+    }
+    .brand{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .logo{
+      width:26px;height:26px;border-radius:8px;
+      background:linear-gradient(135deg, rgba(255,189,92,.95), rgba(88,140,255,.85));
+      box-shadow:0 10px 24px rgba(0,0,0,.35);
+    }
+    .pill{
+      font-size:12px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(0,0,0,.18);
+      color:var(--muted);
+      white-space:nowrap;
+    }
 
-.card{
-  flex:1;
-  background:var(--card);
-  padding:24px;
-  border-radius:var(--radius);
-  border:1px solid var(--border);
-}
+    /* hero grid */
+    .hero{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:22px;
+      align-items:stretch;
+    }
+    @media (max-width: 980px){
+      .hero{ grid-template-columns:1fr; }
+    }
 
-/* ===== FLOATING BUTTON ===== */
+    .card{
+      border:1px solid var(--border);
+      background:var(--panel);
+      border-radius:var(--r);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
 
-#sg-launcher{
-  position:fixed;
-  right:22px;
-  bottom:22px;
-  background:var(--accent);
-  color:#111;
-  border:none;
-  padding:14px 20px;
-  border-radius:999px;
-  font-weight:600;
-  cursor:pointer;
-  box-shadow:0 10px 30px rgba(0,0,0,.5);
-  z-index:9999;
-}
+    .heroLeft{
+      padding:26px;
+      position:relative;
+    }
+    .kicker{
+      font-size:12px;
+      letter-spacing:.12em;
+      color:var(--muted);
+      text-transform:uppercase;
+      margin-bottom:10px;
+    }
+    .h1{
+      font-size:44px;
+      line-height:1.06;
+      margin:0 0 10px;
+      font-weight:800;
+    }
+    .h1 .warm{ color:var(--accent2); }
+    .sub{
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.55;
+      max-width:62ch;
+      margin:0 0 16px;
+    }
+    .ctaRow{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:14px;
+    }
+    .btn{
+      border:none;
+      cursor:pointer;
+      border-radius:12px;
+      padding:11px 14px;
+      font-weight:700;
+      font-size:13px;
+      transition:.15s ease;
+    }
+    .btn.primary{
+      background:linear-gradient(180deg, var(--accent2), var(--accent));
+      color:#151515;
+      box-shadow:0 12px 28px rgba(243,165,38,.24);
+    }
+    .btn.primary:hover{ transform:translateY(-1px); }
+    .btn.ghost{
+      background:rgba(0,0,0,.18);
+      border:1px solid var(--border);
+      color:var(--text);
+    }
+    .tiny{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:10px;
+    }
 
-#sg-launcher:hover{
-  background:var(--accent2);
-}
+    .miniCards{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:12px;
+      margin-top:18px;
+    }
+    @media (max-width: 720px){
+      .miniCards{ grid-template-columns:1fr; }
+    }
+    .mini{
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(0,0,0,.18);
+    }
+    .mini b{ display:block; margin-bottom:6px; }
+    .mini span{ color:var(--muted); font-size:12px; line-height:1.4; }
 
-/* ===== SIDE WIDGET (NOT MODAL) ===== */
+    /* right info panel */
+    .heroRight{
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .panelTitle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:2px;
+    }
+    .panelTitle b{ font-size:13px; }
+    .grid2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .box{
+      padding:14px;
+      border-radius:14px;
+      border:1px dashed rgba(255,255,255,.18);
+      background:rgba(0,0,0,.16);
+    }
+    .box b{ font-size:12px; display:block; margin-bottom:8px; color:rgba(255,255,255,.86); }
+    ul{
+      margin:0; padding-left:16px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.6;
+    }
+    .emailBox{
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(0,0,0,.18);
+    }
+    .emailBox b{ font-size:12px; }
+    .emailBox .row{
+      display:flex; gap:10px; flex-wrap:wrap;
+      margin-top:10px;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:var(--good);
+      margin-top:5px;
+      box-shadow:0 0 0 4px rgba(87,214,123,.14);
+    }
+    .rowItem{
+      display:flex; gap:8px; align-items:flex-start;
+    }
 
-#sg-panel{
-  position:fixed;
-  right:-400px;
-  bottom:90px;
-  width:360px;
-  max-width:calc(100vw - 40px);
-  height:560px;
-  max-height:calc(100vh - 120px);
-  background:#0f1523;
-  border-radius:var(--radius);
-  border:1px solid var(--border);
-  box-shadow:0 25px 70px rgba(0,0,0,.6);
-  transition:.3s ease;
-  z-index:9998;
-  display:flex;
-  flex-direction:column;
-}
+    /* how it works (NO seam line) */
+    .how{
+      margin-top:22px;
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:12px;
+    }
+    @media (max-width: 980px){
+      .how{ grid-template-columns:1fr; }
+    }
+    .step{
+      padding:16px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(0,0,0,.18);
+      position:relative;
+    }
+    .num{
+      width:26px;height:26px;border-radius:9px;
+      display:grid;place-items:center;
+      background:rgba(243,165,38,.18);
+      border:1px solid rgba(243,165,38,.35);
+      color:rgba(255,255,255,.92);
+      font-weight:800;
+      font-size:12px;
+      margin-bottom:10px;
+    }
+    .step b{ display:block; margin-bottom:6px; }
+    .step span{ color:var(--muted); font-size:12px; line-height:1.45; display:block; }
 
-#sg-panel.open{
-  right:22px;
-}
+    .footer{
+      margin-top:18px;
+      color:rgba(255,255,255,.55);
+      font-size:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
 
-/* HEADER */
-.sg-header{
-  padding:16px;
-  border-bottom:1px solid var(--border);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  font-weight:600;
-}
+    /* ================================
+       FLOATING WIDGET (side panel, non-modal)
+       ================================ */
 
-.sg-close{
-  background:none;
-  border:none;
-  color:var(--muted);
-  font-size:18px;
-  cursor:pointer;
-}
+    #sg-launch{
+      position:fixed;
+      right:22px;
+      bottom:22px;
+      z-index:9999;
+      border:none;
+      cursor:pointer;
+      border-radius:999px;
+      padding:12px 16px;
+      font-weight:800;
+      color:#141414;
+      background:linear-gradient(180deg, var(--accent2), var(--accent));
+      box-shadow:0 18px 40px rgba(243,165,38,.22);
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    #sg-launch:active{ transform:translateY(1px); }
+    .spark{
+      width:10px;height:10px;border-radius:50%;
+      background:rgba(0,0,0,.25);
+      box-shadow:0 0 0 4px rgba(0,0,0,.12);
+    }
 
-/* BODY */
-.sg-body{
-  padding:16px;
-  overflow-y:auto;
-  flex:1;
-}
+    #sg-panel{
+      position:fixed;
+      right:-420px;
+      bottom:88px;
+      width:380px;
+      max-width:calc(100vw - 42px);
+      height:560px;
+      max-height:calc(100vh - 140px);
+      z-index:9998;
+      border-radius:18px;
+      border:1px solid var(--border);
+      background:rgba(12,16,28,.92);
+      backdrop-filter: blur(10px);
+      box-shadow:0 24px 80px rgba(0,0,0,.65);
+      transition: right .28s ease;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      pointer-events:auto;
+    }
+    #sg-panel.open{ right:22px; }
 
-label{
-  font-size:12px;
-  color:var(--muted);
-}
+    .sgHead{
+      padding:14px 14px 12px;
+      border-bottom:1px solid var(--soft);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.00));
+    }
+    .sgHead b{ font-size:13px; }
+    .sgHead span{ font-size:12px; color:var(--muted); display:block; margin-top:2px; }
+    .sgClose{
+      border:none;
+      background:rgba(255,255,255,.08);
+      border:1px solid var(--border);
+      color:rgba(255,255,255,.85);
+      border-radius:12px;
+      padding:8px 10px;
+      cursor:pointer;
+    }
 
-input, select, textarea{
-  width:100%;
-  padding:10px;
-  margin-top:4px;
-  margin-bottom:12px;
-  background:#121a2b;
-  border:1px solid var(--border);
-  border-radius:8px;
-  color:white;
-}
+    .sgBody{
+      padding:14px;
+      overflow:auto;
+      flex:1;
+    }
 
-textarea{
-  resize:none;
-}
+    .fieldRow{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 420px){
+      .fieldRow{ grid-template-columns:1fr; }
+    }
 
-button.primary{
-  width:100%;
-  padding:12px;
-  background:var(--accent);
-  border:none;
-  border-radius:8px;
-  font-weight:600;
-  cursor:pointer;
-  margin-top:10px;
-}
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+    input, select, textarea{
+      width:100%;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.06);
+      color:rgba(255,255,255,.92);
+      padding:10px 12px;
+      outline:none;
+    }
+    textarea{ resize:none; }
 
-button.secondary{
-  width:100%;
-  padding:10px;
-  margin-top:8px;
-  background:transparent;
-  border:1px solid var(--border);
-  border-radius:8px;
-  color:var(--muted);
-  cursor:pointer;
-}
+    .hint{
+      font-size:12px;
+      color:rgba(255,255,255,.60);
+      margin:10px 0 10px;
+      line-height:1.35;
+    }
 
-.range-box{
-  margin-top:12px;
-  padding:10px;
-  background:#111a2b;
-  border-radius:8px;
-  border:1px solid var(--border);
-  text-align:center;
-  font-weight:600;
-}
-</style>
+    .sgBtn{
+      width:100%;
+      border:none;
+      cursor:pointer;
+      border-radius:12px;
+      padding:12px 14px;
+      font-weight:900;
+      margin-top:10px;
+      background:linear-gradient(180deg, var(--accent2), var(--accent));
+      color:#151515;
+    }
+    .sgBtn.secondary{
+      margin-top:8px;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--border);
+      color:rgba(255,255,255,.85);
+      font-weight:800;
+    }
+
+    .rangeBox{
+      margin-top:12px;
+      padding:12px;
+      border-radius:14px;
+      border:1px solid rgba(243,165,38,.35);
+      background:rgba(243,165,38,.10);
+      display:none;
+    }
+    .rangeTop{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      margin-bottom:6px;
+    }
+    .rangeTop b{ font-size:13px; }
+    .rangeTop small{ color:rgba(255,255,255,.65); font-size:12px; }
+    .rangeNum{
+      font-weight:1000;
+      letter-spacing:.2px;
+      font-size:14px;
+    }
+
+    .error{
+      display:none;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,90,90,.35);
+      background:rgba(255,90,90,.12);
+      color:rgba(255,255,255,.88);
+      font-size:12px;
+      line-height:1.35;
+    }
+
+    .ok{
+      display:none;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(87,214,123,.35);
+      background:rgba(87,214,123,.10);
+      color:rgba(255,255,255,.90);
+      font-size:12px;
+      line-height:1.35;
+    }
+
+    /* IMPORTANT: page stays usable (no overlay) */
+  </style>
 </head>
 
 <body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>ScopeGate</div>
+      </div>
+      <div class="pill">Estimate → Confirm → Sent</div>
+    </div>
 
-<div class="container">
-  <h1>Stop wasting time on unqualified leads.</h1>
-  <p>ScopeGate is a plug-and-play estimate widget for contractor websites.</p>
+    <div class="hero">
+      <!-- LEFT -->
+      <div class="card heroLeft">
+        <div class="kicker">Made for contractors</div>
+        <h1 class="h1">Stop wasting time on <span class="warm">unqualified leads.</span></h1>
+        <p class="sub">
+          ScopeGate is a plug-and-play estimate widget for contractor websites.
+          It shows customers a realistic budget range based on scope — then only sends the lead if they’re comfortable with it.
+        </p>
 
-  <div class="cards">
-    <div class="card">Pre-qualifies before the call</div>
-    <div class="card">Captures scope + contact</div>
-    <div class="card">Feels native on any site</div>
+        <div class="ctaRow">
+          <button class="btn primary" id="openWidgetTop">Open Demo Widget</button>
+          <button class="btn ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">See how it works</button>
+        </div>
+
+        <div class="tiny">One file. No build steps. Drop-in widget style demo below (and the floating button is live).</div>
+
+        <div class="miniCards">
+          <div class="mini">
+            <b>Pre-qualifies before the call</b>
+            <span>Customers see a range and self-select before you waste a site visit.</span>
+          </div>
+          <div class="mini">
+            <b>Captures scope + contact</b>
+            <span>You get the basics you need: scope, timeline, and budget comfort.</span>
+          </div>
+          <div class="mini">
+            <b>Feels native on any site</b>
+            <span>Floating button + side panel. Clean. Fast. Doesn’t block the page.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="card heroRight">
+        <div class="panelTitle">
+          <b>What the customer provides</b>
+          <div class="pill" style="padding:6px 10px;">Basement demo</div>
+        </div>
+
+        <div class="grid2">
+          <div class="box">
+            <b>CUSTOMER ENTERS</b>
+            <ul>
+              <li>Name + email</li>
+              <li>Basement size</li>
+              <li>Ceiling + wall finish</li>
+              <li>Bedrooms + bathrooms</li>
+              <li>Timeline + extras</li>
+            </ul>
+          </div>
+          <div class="box">
+            <b>SCOPEGATE RETURNS</b>
+            <ul>
+              <li>Estimated range (low–high)</li>
+              <li>Key cost drivers included</li>
+              <li>Confirm / Not Interested gate</li>
+              <li>Only confirmed leads are sent</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="emailBox">
+          <b>Contractor email includes</b>
+          <div class="row">
+            <div class="rowItem"><div class="dot"></div><div>Customer contact info</div></div>
+            <div class="rowItem"><div class="dot"></div><div>Scope answers + timeline</div></div>
+            <div class="rowItem"><div class="dot"></div><div>Confirmed budget range</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="how" class="how">
+      <div class="step">
+        <div class="num">1</div>
+        <b>Customer describes the job</b>
+        <span>Just enough detail to price a realistic range.</span>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <b>They get a budget range</b>
+        <span>No surprises. No wasted calls.</span>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <b>Confirm sends the lead</b>
+        <span>By clicking confirm, their information is sent to the contractor who will be in touch shortly.</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>© 2026 ScopeGate • Built for contractors</div>
+      <div style="color:rgba(255,255,255,.55)">Demo uses your Formspree endpoint for testing.</div>
+    </div>
   </div>
-</div>
 
-<!-- FLOATING BUTTON -->
-<button id="sg-launcher">New project? Get a quick range</button>
+  <!-- Floating launcher -->
+  <button id="sg-launch" type="button">
+    <span class="spark"></span>
+    New project? Get a quick range
+  </button>
 
-<!-- SIDE WIDGET -->
-<div id="sg-panel">
-  <div class="sg-header">
-    <div>Instant Basement Estimate</div>
-    <button class="sg-close" onclick="closeWidget()">✕</button>
-  </div>
+  <!-- Side widget panel (non-modal) -->
+  <aside id="sg-panel" aria-hidden="true">
+    <div class="sgHead">
+      <div>
+        <b>Instant Basement Estimate</b>
+        <span>See a realistic range. Confirm only if you’re comfortable.</span>
+      </div>
+      <button class="sgClose" type="button" id="sg-close">✕</button>
+    </div>
 
-  <div class="sg-body">
-    <label>Name</label>
-    <input id="name">
+    <div class="sgBody">
+      <div class="fieldRow">
+        <div>
+          <label>Your name</label>
+          <input id="sg_name" placeholder="John Smith" />
+        </div>
+        <div>
+          <label>Postal code (optional)</label>
+          <input id="sg_postal" placeholder="T6E 0R4" />
+        </div>
+      </div>
 
-    <label>Email (required to confirm)</label>
-    <input id="email">
+      <div>
+        <label>Email (required to confirm & send)</label>
+        <input id="sg_email" placeholder="you@example.com" />
+      </div>
 
-    <label>Basement size (sq ft)</label>
-    <input id="size" type="number">
+      <div class="fieldRow">
+        <div>
+          <label>Basement size (sq ft)</label>
+          <input id="sg_size" type="number" min="0" placeholder="900" />
+        </div>
+        <div>
+          <label>Ceiling type</label>
+          <select id="sg_ceiling">
+            <option>Drywall ceiling (finished)</option>
+            <option>Drop ceiling</option>
+            <option>Open joist</option>
+          </select>
+        </div>
+      </div>
 
-    <label>Ceiling type</label>
-    <select id="ceiling">
-      <option>Drywall (finished)</option>
-      <option>Drop ceiling</option>
-      <option>Open joist</option>
-    </select>
+      <div class="fieldRow">
+        <div>
+          <label>Finished or unfinished walls?</label>
+          <select id="sg_walls">
+            <option>Finished walls</option>
+            <option>Unfinished walls</option>
+          </select>
+        </div>
+        <div>
+          <label>Timeline</label>
+          <select id="sg_timeline">
+            <option>1–3 months</option>
+            <option>3–6 months</option>
+            <option>Flexible</option>
+          </select>
+        </div>
+      </div>
 
-    <label>Finished or unfinished walls?</label>
-    <select id="walls">
-      <option>Finished walls</option>
-      <option>Unfinished walls</option>
-    </select>
+      <div class="fieldRow">
+        <div>
+          <label>Build standard</label>
+          <select id="sg_standard">
+            <option>Basic</option>
+            <option selected>Standard (most common)</option>
+            <option>Premium</option>
+          </select>
+        </div>
+        <div>
+          <label>Extras</label>
+          <select id="sg_extras">
+            <option>None</option>
+            <option>Pot lights</option>
+            <option>Kitchen rough-in</option>
+            <option>Separate entrance</option>
+            <option>Panel/service upgrade needed</option>
+          </select>
+        </div>
+      </div>
 
-    <label>Timeline</label>
-    <select id="timeline">
-      <option>1–3 months</option>
-      <option>3–6 months</option>
-      <option>Flexible</option>
-    </select>
+      <div class="fieldRow">
+        <div>
+          <label>Number of bathrooms</label>
+          <input id="sg_bathrooms" type="number" min="0" value="0" />
+        </div>
+        <div>
+          <label>Number of bedrooms</label>
+          <input id="sg_bedrooms" type="number" min="0" value="0" />
+        </div>
+      </div>
 
-    <label>Build standard</label>
-    <select id="standard">
-      <option>Basic</option>
-      <option>Standard (most common)</option>
-      <option>Premium</option>
-    </select>
+      <div>
+        <label>Describe the job (optional)</label>
+        <textarea id="sg_notes" rows="3" placeholder="Example: 900 sq ft basement finish, 2 bedrooms, 1 bathroom rough-in, 12 pot lights, 2 new circuits."></textarea>
+      </div>
 
-    <label>Number of bathrooms</label>
-    <input id="bathrooms" type="number" min="0" value="0">
+      <div class="hint">This is a budget range for pre-qualification. Final quote requires a site visit.</div>
 
-    <label>Number of bedrooms</label>
-    <input id="bedrooms" type="number" min="0" value="0">
+      <button class="sgBtn" type="button" id="sg_estimate">Get Estimate</button>
 
-    <label>Extras</label>
-    <select id="extras">
-      <option>None</option>
-      <option>Pot lights</option>
-      <option>Kitchen rough-in</option>
-      <option>Separate entrance</option>
-    </select>
+      <div class="rangeBox" id="sg_rangeBox">
+        <div class="rangeTop">
+          <b>Estimated Range</b>
+          <small id="sg_drivers">Drivers included</small>
+        </div>
+        <div class="rangeNum" id="sg_rangeText">$0 – $0</div>
+      </div>
 
-    <label>Description (optional)</label>
-    <textarea rows="3"></textarea>
+      <div class="error" id="sg_error"></div>
+      <div class="ok" id="sg_ok"></div>
 
-    <button class="primary" onclick="generateEstimate()">Get Estimate</button>
+      <button class="sgBtn" type="button" id="sg_confirm" style="display:none;">Confirm & Send</button>
+      <button class="sgBtn secondary" type="button" id="sg_deny" style="display:none;">Not Interested</button>
+    </div>
+  </aside>
 
-    <div id="range" class="range-box" style="display:none;"></div>
+  <script>
+    // ====== CONFIG ======
+    const FORMSPREE_ENDPOINT = "https://formspree.io/f/xnjbanbn";
 
-    <button id="confirmBtn" class="primary" style="display:none;">Confirm & Send</button>
-    <button id="denyBtn" class="secondary" style="display:none;" onclick="closeWidget()">Not Interested</button>
-  </div>
-</div>
+    // ====== OPEN/CLOSE ======
+    const launchBtn = document.getElementById("sg-launch");
+    const panel = document.getElementById("sg-panel");
+    const closeBtn = document.getElementById("sg-close");
+    const openTop = document.getElementById("openWidgetTop");
 
-<script>
-const launcher = document.getElementById("sg-launcher");
-const panel = document.getElementById("sg-panel");
+    function openWidget(){
+      panel.classList.add("open");
+      panel.setAttribute("aria-hidden","false");
+    }
+    function closeWidget(){
+      panel.classList.remove("open");
+      panel.setAttribute("aria-hidden","true");
+    }
 
-launcher.onclick = () => panel.classList.add("open");
-function closeWidget(){ panel.classList.remove("open"); }
+    launchBtn.addEventListener("click", openWidget);
+    closeBtn.addEventListener("click", closeWidget);
+    openTop.addEventListener("click", openWidget);
 
-function generateEstimate(){
-  const size = parseInt(document.getElementById("size").value) || 0;
-  const bathrooms = parseInt(document.getElementById("bathrooms").value) || 0;
-  const bedrooms = parseInt(document.getElementById("bedrooms").value) || 0;
-  const standard = document.getElementById("standard").value;
+    // ====== ESTIMATE LOGIC (placeholder math; you’ll tune with your jman) ======
+    const $ = (id) => document.getElementById(id);
 
-  let base = size * 40;
-  base += bathrooms * 6000;
-  base += bedrooms * 1500;
+    let lastEstimate = null;
 
-  if(standard.includes("Premium")) base *= 1.3;
-  if(standard.includes("Basic")) base *= .85;
+    function money(n){
+      return "$" + Math.round(n).toLocaleString();
+    }
 
-  const low = Math.round(base * .9);
-  const high = Math.round(base * 1.15);
+    function showError(msg){
+      $("sg_error").style.display = "block";
+      $("sg_error").textContent = msg;
+      $("sg_ok").style.display = "none";
+    }
+    function showOk(msg){
+      $("sg_ok").style.display = "block";
+      $("sg_ok").textContent = msg;
+      $("sg_error").style.display = "none";
+    }
 
-  document.getElementById("range").style.display="block";
-  document.getElementById("range").innerText =
-    `Estimated Range: $${low.toLocaleString()} – $${high.toLocaleString()}`;
+    $("sg_estimate").addEventListener("click", () => {
+      $("sg_error").style.display = "none";
+      $("sg_ok").style.display = "none";
 
-  document.getElementById("confirmBtn").style.display="block";
-  document.getElementById("denyBtn").style.display="block";
-}
-</script>
+      const size = parseInt($("sg_size").value || "0", 10);
+      const baths = parseInt($("sg_bathrooms").value || "0", 10);
+      const beds  = parseInt($("sg_bedrooms").value || "0", 10);
+      const ceiling = $("sg_ceiling").value;
+      const walls = $("sg_walls").value;
+      const standard = $("sg_standard").value;
+      const extras = $("sg_extras").value;
 
+      if(size <= 0){
+        showError("Enter a basement size (sq ft) to generate a range.");
+        return;
+      }
+
+      // Base $/sqft assumption (placeholder)
+      let baseRate = 38;
+
+      // modifiers
+      if (walls.includes("Finished")) baseRate += 8;
+      if (ceiling.includes("Drywall")) baseRate += 5;
+      if (ceiling.includes("Drop")) baseRate += 2;
+      if (ceiling.includes("Open")) baseRate -= 2;
+
+      // standard factor
+      let factor = 1.0;
+      if (standard === "Basic") factor = 0.88;
+      if (standard.startsWith("Standard")) factor = 1.00;
+      if (standard === "Premium") factor = 1.22;
+
+      // rooms adders (very rough placeholders)
+      let add = (baths * 6500) + (beds * 1400);
+
+      // extras adders
+      if (extras.includes("Pot")) add += 1800;
+      if (extras.includes("Kitchen")) add += 2500;
+      if (extras.includes("Separate")) add += 1500;
+      if (extras.includes("Panel")) add += 3500;
+
+      const mid = (size * baseRate + add) * factor;
+
+      const low = mid * 0.88;
+      const high = mid * 1.14;
+
+      lastEstimate = { low: Math.round(low), high: Math.round(high) };
+
+      $("sg_rangeBox").style.display = "block";
+      $("sg_rangeText").textContent = `${money(low)} – ${money(high)}`;
+
+      // show buttons
+      $("sg_confirm").style.display = "block";
+      $("sg_deny").style.display = "block";
+
+      // drivers line
+      const drivers = [];
+      drivers.push(`${size} sq ft`);
+      drivers.push(`${beds} bed`);
+      drivers.push(`${baths} bath`);
+      drivers.push(standard);
+      $("sg_drivers").textContent = drivers.join(" • ");
+    });
+
+    // Not Interested = do nothing (just close)
+    $("sg_deny").addEventListener("click", () => {
+      closeWidget();
+    });
+
+    // ====== CONFIRM & SEND (Formspree) ======
+    $("sg_confirm").addEventListener("click", async () => {
+      $("sg_error").style.display = "none";
+      $("sg_ok").style.display = "none";
+
+      const email = $("sg_email").value.trim();
+      if(!email){
+        showError("Email is required to confirm & send.");
+        return;
+      }
+      if(!lastEstimate){
+        showError("Generate an estimate first, then confirm.");
+        return;
+      }
+
+      const payload = new FormData();
+      payload.append("_subject", "ScopeGate CONFIRMED Quote");
+      payload.append("customer_email", email);
+      payload.append("name", $("sg_name").value.trim());
+      payload.append("postal", $("sg_postal").value.trim());
+      payload.append("basement_size_sqft", $("sg_size").value);
+      payload.append("ceiling_type", $("sg_ceiling").value);
+      payload.append("walls_finish", $("sg_walls").value);
+      payload.append("timeline", $("sg_timeline").value);
+      payload.append("build_standard", $("sg_standard").value);
+      payload.append("extras", $("sg_extras").value);
+      payload.append("bathrooms", $("sg_bathrooms").value);
+      payload.append("bedrooms", $("sg_bedrooms").value);
+      payload.append("notes", $("sg_notes").value.trim());
+      payload.append("estimate_low", money(lastEstimate.low));
+      payload.append("estimate_high", money(lastEstimate.high));
+      payload.append("estimate_range", `${money(lastEstimate.low)} – ${money(lastEstimate.high)}`);
+      payload.append("status", "confirmed");
+
+      try{
+        const res = await fetch(FORMSPREE_ENDPOINT, {
+          method: "POST",
+          body: payload,
+          headers: { "Accept": "application/json" }
+        });
+
+        if(!res.ok){
+          throw new Error("Formspree rejected the submission.");
+        }
+
+        showOk("Confirmed. Your information was sent to the contractor who will be in touch shortly.");
+        // optionally auto-close after a moment
+        setTimeout(closeWidget, 1400);
+      }catch(err){
+        showError("It generated fine, but the send failed. Check your Formspree form settings + email notifications.");
+      }
+    });
+  </script>
 </body>
 </html>
