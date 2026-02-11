@@ -3,723 +3,757 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ScopeGate — Pre-Qualify Contractor Leads</title>
-  <meta name="description" content="ScopeGate is a plug-and-play estimate widget for contractor websites. Show a realistic range and only send confirmed leads." />
+  <title>ScopeGate — Instant Estimate Widget Demo</title>
+  <meta name="description" content="ScopeGate is a plug-and-play estimate widget for contractor websites. Show a realistic range, then only send confirmed leads." />
 
   <style>
     :root{
-      --bg:#0b0f1a;
-      --panel:rgba(255,255,255,.06);
-      --panel2:rgba(255,255,255,.08);
-      --line:rgba(255,255,255,.10);
+      --bg:#070a11;
+      --card:rgba(255,255,255,.06);
+      --card2:rgba(255,255,255,.075);
+      --line:rgba(255,255,255,.14);
       --txt:rgba(255,255,255,.92);
       --mut:rgba(255,255,255,.68);
-      --accent:#f6b24a;
-      --accent2:#eaa53d;
-      --ok:#64d28b;
-      --danger:#ff6b6b;
+      --mut2:rgba(255,255,255,.52);
+
+      --accent:#f4a62a;
+      --accent2:#ffbf57;
+      --accentTxt:#121212;
+
       --r:18px;
-      --max:1100px;
-      --shadow:0 18px 60px rgba(0,0,0,.55);
+      --shadow:0 18px 70px rgba(0,0,0,.55);
+
+      --max:1080px;
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
     body{
       margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
       color:var(--txt);
-      background:var(--bg);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       line-height:1.45;
+      background:var(--bg);
+      overflow-x:hidden;
     }
 
-    /* No gradient seams: keep background solid + use contained glows only */
-    .bg-glow{
+    /* One continuous background layer (prevents “seams”) */
+    body::before{
+      content:"";
       position:fixed;
-      inset:-40vh -40vw auto -40vw;
-      height:80vh;
-      pointer-events:none;
-      filter:blur(50px);
-      opacity:.35;
+      inset:0;
+      z-index:-1;
       background:
-        radial-gradient(600px 280px at 15% 35%, rgba(246,178,74,.45), transparent 70%),
-        radial-gradient(520px 260px at 75% 25%, rgba(109,180,255,.30), transparent 70%),
-        radial-gradient(500px 260px at 55% 80%, rgba(255,120,120,.20), transparent 75%);
+        radial-gradient(1200px 600px at 18% 10%, rgba(83,148,255,.30), transparent 55%),
+        radial-gradient(900px 520px at 82% 12%, rgba(255,162,54,.22), transparent 58%),
+        radial-gradient(900px 700px at 60% 85%, rgba(120,255,210,.12), transparent 55%),
+        radial-gradient(1200px 900px at 40% 120%, rgba(255,255,255,.06), transparent 60%);
+      filter:saturate(1.05);
     }
 
-    a{color:inherit}
-    .wrap{max-width:var(--max); margin:0 auto; padding:34px 20px 80px}
-    .topbar{
+    a{ color:inherit; text-decoration:none; }
+
+    .wrap{
+      width:min(var(--max), calc(100% - 36px));
+      margin:0 auto;
+      padding:28px 0 56px;
+    }
+
+    .top{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
-      margin-bottom:22px;
+      gap:16px;
+      margin-bottom:18px;
     }
     .brand{
       display:flex;
       align-items:center;
       gap:10px;
-      font-weight:800;
+      font-weight:700;
       letter-spacing:.2px;
     }
     .logo{
-      width:30px;height:30px;border-radius:10px;
-      background:linear-gradient(135deg, rgba(246,178,74,.95), rgba(109,180,255,.55));
-      box-shadow:0 10px 30px rgba(0,0,0,.4);
+      width:28px;
+      height:28px;
+      border-radius:9px;
+      background:linear-gradient(135deg, rgba(255,191,87,.95), rgba(83,148,255,.85));
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
     }
     .pill{
       padding:8px 12px;
-      border-radius:999px;
       border:1px solid var(--line);
       background:rgba(255,255,255,.04);
+      border-radius:999px;
       color:var(--mut);
-      font-size:12px;
-      user-select:none;
-      white-space:nowrap;
+      font-size:13px;
     }
 
     .hero{
-      background:rgba(255,255,255,.03);
-      border:1px solid var(--line);
-      border-radius:24px;
-      padding:26px;
-      box-shadow:var(--shadow);
-      position:relative;
-      overflow:hidden;
-    }
-    .hero h1{
-      margin:0 0 8px;
-      font-size:40px;
-      letter-spacing:-.6px;
-    }
-    .hero p{
-      margin:0 0 18px;
-      color:var(--mut);
-      max-width:74ch;
-    }
-
-    .cta-row{display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:14px;}
-    .btn{
-      border:none;
-      cursor:pointer;
-      border-radius:14px;
-      padding:12px 16px;
-      font-weight:800;
-      transition:transform .08s ease, filter .15s ease, background .15s ease, border-color .15s ease;
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      user-select:none;
-    }
-    .btn:active{transform:translateY(1px)}
-    .btn-primary{
-      background:linear-gradient(180deg, var(--accent), var(--accent2));
-      color:#1a1206;
-      box-shadow:0 12px 32px rgba(246,178,74,.25);
-    }
-    .btn-ghost{
-      background:rgba(255,255,255,.04);
-      border:1px solid var(--line);
-      color:var(--txt);
-    }
-    .btn-ghost:hover{filter:brightness(1.05)}
-    .hint{
-      color:var(--mut);
-      font-size:12px;
-    }
-
-    .grid{
       display:grid;
-      grid-template-columns: 1.2fr .8fr;
+      grid-template-columns:1.2fr .8fr;
       gap:18px;
-      margin-top:18px;
-    }
-    @media (max-width: 980px){
-      .grid{grid-template-columns:1fr}
-      .hero h1{font-size:34px}
-    }
-
-    .card{
-      background:rgba(255,255,255,.04);
-      border:1px solid var(--line);
-      border-radius:22px;
-      padding:18px;
-    }
-    .card h3{margin:0 0 8px; font-size:14px; color:var(--mut); letter-spacing:.3px}
-    .list{margin:0; padding-left:18px; color:var(--txt)}
-    .list li{margin:8px 0; color:rgba(255,255,255,.82)}
-    .list small{color:var(--mut)}
-
-    .mini{
-      display:grid;
-      grid-template-columns:repeat(3, 1fr);
-      gap:12px;
+      align-items:start;
       margin-top:14px;
     }
-    @media (max-width: 980px){
-      .mini{grid-template-columns:1fr}
+    @media (max-width:920px){
+      .hero{ grid-template-columns:1fr; }
     }
-    .mini .tile{
-      background:rgba(255,255,255,.045);
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:14px;
-    }
-    .tile b{display:block; margin-bottom:6px}
-    .tile p{margin:0; color:var(--mut); font-size:13px}
 
-    .how{
+    .panel{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:var(--r);
+      box-shadow:var(--shadow);
+    }
+
+    .heroLeft{ padding:22px; }
+    .kicker{
+      color:var(--mut);
+      font-size:13px;
+      letter-spacing:.35px;
+      text-transform:uppercase;
+      margin-bottom:10px;
+    }
+    h1{
+      margin:0 0 10px;
+      font-size:clamp(30px, 4.2vw, 46px);
+      line-height:1.05;
+      letter-spacing:-.6px;
+    }
+    .sub{
+      margin:0 0 18px;
+      color:var(--mut);
+      max-width:60ch;
+    }
+
+    .ctaRow{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin:16px 0 8px;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      border-radius:12px;
+      padding:11px 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.05);
+      color:var(--txt);
+      font-weight:600;
+      cursor:pointer;
+      user-select:none;
+      transition:transform .08s ease, background .15s ease, border-color .15s ease;
+    }
+    .btn:active{ transform:translateY(1px); }
+    .btn.primary{
+      background:linear-gradient(180deg, var(--accent2), var(--accent));
+      color:var(--accentTxt);
+      border-color:rgba(0,0,0,.08);
+      box-shadow:0 16px 40px rgba(244,166,42,.20);
+    }
+    .micro{
+      color:var(--mut2);
+      font-size:12.5px;
+      margin-top:8px;
+    }
+
+    .cards3{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
       margin-top:18px;
+    }
+    @media (max-width:920px){
+      .cards3{ grid-template-columns:1fr; }
+    }
+    .mini{
+      padding:14px;
+      background:var(--card2);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+    }
+    .mini h3{ margin:0 0 6px; font-size:14px; }
+    .mini p{ margin:0; color:var(--mut); font-size:13px; }
+
+    .heroRight{ padding:18px; }
+    .heroRight h3{
+      margin:2px 0 10px;
+      font-size:14px;
+      color:var(--mut);
+      letter-spacing:.2px;
+      text-transform:uppercase;
+    }
+    .list{ margin:0; padding-left:18px; color:var(--mut); font-size:13.5px; }
+    .list li{ margin:7px 0; }
+
+    .how{ margin-top:22px; padding:18px; }
+    .howTitle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .howTitle h2{ margin:0; font-size:18px; letter-spacing:-.2px; }
+    .howTitle .mut{ color:var(--mut); font-size:13px; }
+
+    .steps{
       display:grid;
       grid-template-columns:repeat(3,1fr);
       gap:12px;
+      margin-top:12px;
     }
-    @media (max-width: 980px){
-      .how{grid-template-columns:1fr}
+    @media (max-width:920px){
+      .steps{ grid-template-columns:1fr; }
     }
     .step{
-      border-radius:18px;
       padding:14px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.045);
-      min-height:88px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.05);
     }
-    .step .num{
-      width:26px;height:26px;border-radius:9px;
-      display:inline-flex;align-items:center;justify-content:center;
-      background:rgba(246,178,74,.16);
-      border:1px solid rgba(246,178,74,.25);
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:26px;
+      height:26px;
+      border-radius:9px;
+      background:rgba(244,166,42,.16);
+      border:1px solid rgba(244,166,42,.35);
+      color:rgba(255,255,255,.90);
+      font-weight:700;
       margin-bottom:10px;
-      font-weight:900;
-      color:rgba(255,255,255,.9);
+      font-size:13px;
     }
-    .step b{display:block; margin-bottom:6px}
-    .step p{margin:0; color:var(--mut); font-size:13px}
+    .step h4{ margin:0 0 6px; font-size:14px; }
+    .step p{ margin:0; color:var(--mut); font-size:13px; }
 
     footer{
       margin-top:18px;
-      color:rgba(255,255,255,.55);
-      font-size:12px;
+      color:var(--mut2);
+      font-size:12.5px;
       display:flex;
+      align-items:center;
       justify-content:space-between;
-      gap:12px;
+      gap:10px;
       flex-wrap:wrap;
     }
 
-    /* Widget */
-    .float-btn{
+    /* Floating button */
+    .floatBtn{
       position:fixed;
-      right:20px;
-      bottom:20px;
-      border:none;
+      right:18px;
+      bottom:18px;
+      z-index:30;
+      padding:12px 14px;
       border-radius:999px;
-      padding:14px 16px;
+      background:linear-gradient(180deg, var(--accent2), var(--accent));
+      color:var(--accentTxt);
+      border:1px solid rgba(0,0,0,.08);
+      font-weight:800;
       cursor:pointer;
-      font-weight:900;
-      background:linear-gradient(180deg, var(--accent), var(--accent2));
-      color:#1a1206;
-      box-shadow:0 18px 40px rgba(0,0,0,.55);
+      box-shadow:0 18px 60px rgba(244,166,42,.26);
       display:flex;
       align-items:center;
       gap:10px;
-      z-index:50;
     }
-    .dot{
-      width:10px;height:10px;border-radius:99px;
-      background:rgba(255,255,255,.75);
-      box-shadow:0 0 0 4px rgba(255,255,255,.18);
+    .floatDot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      background:rgba(0,0,0,.28);
+      box-shadow:inset 0 0 0 2px rgba(255,255,255,.22);
     }
 
-    .modal{
+    /* Modal */
+    .overlay{
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,.55);
+      z-index:40;
       display:none;
-      align-items:flex-end;
-      justify-content:flex-end;
-      padding:20px;
-      z-index:60;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:rgba(0,0,0,.55);
+      backdrop-filter:blur(6px);
     }
-    .modal.open{display:flex}
-    .sheet{
-      width:380px;
-      max-width:92vw;
-      background:rgba(18,24,38,.96);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:24px;
-      box-shadow:0 24px 80px rgba(0,0,0,.65);
+    .overlay.open{ display:flex; }
+
+    .modal{
+      width:min(620px, 100%);
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(14,18,30,.92);
+      box-shadow:var(--shadow);
       overflow:hidden;
     }
-    .sheet-head{
+    .modalHeader{
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
       gap:12px;
-      padding:16px 16px 10px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      background:rgba(255,255,255,.03);
+      padding:16px 16px 12px;
+      border-bottom:1px solid rgba(255,255,255,.10);
     }
-    .sheet-head h4{
-      margin:0 0 4px;
-      font-size:16px;
-      letter-spacing:.2px;
-    }
-    .sheet-head p{
-      margin:0;
-      color:var(--mut);
-      font-size:12px;
-    }
+    .modalHeader h3{ margin:0; font-size:16px; letter-spacing:-.2px; }
+    .modalHeader p{ margin:4px 0 0; color:var(--mut); font-size:13px; }
     .x{
-      width:34px;height:34px;border-radius:12px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.04);
-      color:rgba(255,255,255,.85);
-      font-weight:900;
+      width:34px;
+      height:34px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06);
+      color:rgba(255,255,255,.9);
       cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      line-height:1;
     }
 
-    .sheet-body{
-      padding:14px 16px 16px;
+    .modalBody{ padding:14px 16px 16px; }
+
+    .grid2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
     }
+    @media (max-width:560px){
+      .grid2{ grid-template-columns:1fr; }
+    }
+
     label{
       display:block;
-      color:rgba(255,255,255,.75);
-      font-size:12px;
-      font-weight:700;
-      margin-top:10px;
-      margin-bottom:6px;
-    }
-    input,select,textarea{
-      width:100%;
-      padding:11px 12px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.18);
-      color:rgba(255,255,255,.92);
-      outline:none;
-    }
-    input:focus,select:focus,textarea:focus{
-      border-color:rgba(246,178,74,.45);
-      box-shadow:0 0 0 3px rgba(246,178,74,.10);
-    }
-    .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-    @media (max-width: 420px){
-      .row2{grid-template-columns:1fr}
-    }
-
-    .actions{
-      margin-top:12px;
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-    .full{width:100%}
-    .subtle{
-      color:rgba(255,255,255,.60);
-      font-size:12px;
-      margin-top:10px;
-    }
-
-    .result{
-      margin-top:12px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.04);
-      padding:12px;
-    }
-    .range{
-      font-size:18px;
-      font-weight:900;
-      letter-spacing:.2px;
+      font-size:12.5px;
+      color:var(--mut);
       margin:0 0 6px;
     }
-    .drivers{
-      margin:0;
-      color:rgba(255,255,255,.74);
-      font-size:12px;
+    input, select, textarea{
+      width:100%;
+      padding:11px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06);
+      color:var(--txt);
+      outline:none;
     }
+    textarea{ min-height:86px; resize:vertical; }
+    input::placeholder, textarea::placeholder{ color:rgba(255,255,255,.35); }
 
-    .confirmBox{
+    .row{ margin-top:10px; }
+
+    .estimateBox{
       margin-top:12px;
       padding:12px;
-      border-radius:16px;
-      border:1px solid rgba(246,178,74,.22);
-      background:rgba(246,178,74,.08);
-    }
-    .confirmBox p{
-      margin:0 0 10px;
-      font-size:12px;
-      color:rgba(255,255,255,.80);
-    }
-    .btn-send{
-      background:linear-gradient(180deg, var(--accent), var(--accent2));
-      color:#1a1206;
-      font-weight:900;
-      border:none;
       border-radius:14px;
-      padding:12px 14px;
-      cursor:pointer;
-      width:100%;
-    }
-    .btn-deny{
-      background:rgba(255,255,255,.04);
+      background:rgba(255,255,255,.05);
       border:1px solid rgba(255,255,255,.10);
-      color:rgba(255,255,255,.85);
-      border-radius:14px;
-      padding:12px 14px;
-      cursor:pointer;
-      width:100%;
-      margin-top:8px;
+      display:none;
+    }
+    .estimateBox.open{ display:block; }
+    .range{ font-weight:900; letter-spacing:.2px; }
+    .fineprint{ margin-top:8px; color:var(--mut); font-size:12.5px; }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+    .btnFull{ flex:1; min-width:160px; }
+    .btnWarn{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+      color:rgba(255,255,255,.90);
     }
 
-    .toast{
-      position:fixed;
-      left:20px;
-      bottom:20px;
-      background:rgba(0,0,0,.75);
-      border:1px solid rgba(255,255,255,.12);
-      color:rgba(255,255,255,.88);
-      padding:10px 12px;
-      border-radius:14px;
-      font-size:12px;
-      box-shadow:0 18px 50px rgba(0,0,0,.6);
-      display:none;
-      z-index:70;
-    }
-    .toast.show{display:block}
-    .ok{color:var(--ok); font-weight:900}
-    .bad{color:var(--danger); font-weight:900}
+    .toast{ margin-top:10px; font-size:13px; color:var(--mut); display:none; }
+    .toast.ok{ display:block; color:rgba(160,255,200,.9); }
+    .toast.err{ display:block; color:rgba(255,170,170,.9); }
   </style>
 </head>
 
 <body>
-  <div class="bg-glow"></div>
-
   <div class="wrap">
-    <div class="topbar">
+    <div class="top">
       <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
+        <div class="logo"></div>
         <div>ScopeGate</div>
       </div>
       <div class="pill">Estimate → Confirm → Sent</div>
     </div>
 
-    <div class="hero">
-      <h1>Stop wasting time on unqualified leads.</h1>
-      <p>
-        ScopeGate is a plug-and-play estimate widget for contractor websites. It shows customers a realistic budget range based on scope —
-        then only sends the lead if they’re comfortable with the number.
-      </p>
+    <section class="hero">
+      <div class="panel heroLeft">
+        <div class="kicker">Made for contractors</div>
+        <h1>Stop wasting time on unqualified leads.</h1>
+        <p class="sub">
+          ScopeGate is a plug-and-play estimate widget for contractor websites.
+          It shows customers a realistic budget range based on scope — then only sends the lead if they’re comfortable with it.
+        </p>
 
-      <div class="cta-row">
-        <button class="btn btn-primary" type="button" onclick="openWidget()">Open Demo Widget</button>
-        <button class="btn btn-ghost" type="button" onclick="scrollToHow()">See how it works</button>
-        <div class="hint">One file. No build steps. Drop-in widget style demo below (and the floating button is live).</div>
-      </div>
+        <div class="ctaRow">
+          <button class="btn primary" id="openDemoTop">Open Demo Widget</button>
+          <a class="btn" href="#how">See how it works</a>
+        </div>
 
-      <div class="grid">
-        <div class="card">
-          <h3>WHAT IT CAPTURES</h3>
-          <ul class="list">
-            <li><b>Name + email</b></li>
-            <li><b>Basement size + finish level</b></li>
-            <li><b>Ceiling type + bathroom</b></li>
-            <li><b>Timeline + notes</b></li>
-          </ul>
+        <div class="micro">One file. No build steps. Drop-in widget style demo below (and the floating button is live).</div>
 
+        <div class="cards3">
           <div class="mini">
-            <div class="tile">
-              <b>Pre-qualifies before the call</b>
-              <p>Customers see a range and self-select before you waste a site visit.</p>
-            </div>
-            <div class="tile">
-              <b>Captures scope + contact</b>
-              <p>You get the basics you need: scope, location, timeline, and budget comfort.</p>
-            </div>
-            <div class="tile">
-              <b>Feels native on any site</b>
-              <p>Floating button + modal. Clean. Fast. Doesn’t clutter the page.</p>
-            </div>
+            <h3>Pre-qualifies before the call</h3>
+            <p>Customers see a range and self-select before you waste a site visit.</p>
+          </div>
+          <div class="mini">
+            <h3>Captures scope + contact</h3>
+            <p>You get the basics you need: scope, timeline, and budget comfort.</p>
+          </div>
+          <div class="mini">
+            <h3>Feels native on any site</h3>
+            <p>Floating button + modal. Clean. Fast. Doesn’t clutter the page.</p>
           </div>
         </div>
-
-        <div class="card">
-          <h3>CONTRACTOR EMAIL INCLUDES</h3>
-          <ul class="list">
-            <li>Customer contact info</li>
-            <li>Location + timeline</li>
-            <li>Scope answers</li>
-            <li><b>Confirmed budget range</b></li>
-          </ul>
-          <p class="hint" style="margin-top:12px;">
-            Demo uses your Formspree endpoint for testing.
-          </p>
-        </div>
       </div>
 
-      <div id="how"></div>
+      <aside class="panel heroRight">
+        <h3>Contractor email includes</h3>
+        <ul class="list">
+          <li>Customer contact info</li>
+          <li>Timeline + location (optional)</li>
+          <li>Basement scope answers (size, bedrooms, bathrooms, finish)</li>
+          <li>Confirmed budget range</li>
+        </ul>
 
-      <div class="how" style="margin-top:18px;">
-        <div class="step">
-          <div class="num">1</div>
-          <b>Customer describes the job</b>
-          <p>Just enough detail to price a realistic range.</p>
-        </div>
-        <div class="step">
-          <div class="num">2</div>
-          <b>They get a budget range</b>
-          <p>No surprises. No wasted calls.</p>
-        </div>
-        <div class="step">
-          <div class="num">3</div>
-          <b>Confirm sends • deny does nothing</b>
-          <p>By clicking confirm, the customer’s info is sent to the contractor who will be in touch shortly.</p>
-        </div>
+        <div style="height:12px"></div>
+
+        <h3>What the customer sees</h3>
+        <ul class="list">
+          <li>Estimated range (low → high)</li>
+          <li>Key scope drivers included</li>
+          <li>Confirm / “not interested” gate</li>
+          <li>Only confirmed leads are sent</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="panel how" id="how">
+      <div class="howTitle">
+        <h2>How it works</h2>
+        <div class="mut">From website visitor → “here’s your rough number” in minutes.</div>
       </div>
 
-      <footer>
-        <div>© 2026 ScopeGate • Built for contractors</div>
-        <div class="hint">Single-file demo • GitHub Pages friendly</div>
-      </footer>
-    </div>
+      <div class="steps">
+        <div class="step">
+          <div class="badge">1</div>
+          <h4>Customer describes the job</h4>
+          <p>Basement size, finish level, bedrooms/bathrooms, and a few extras.</p>
+        </div>
+        <div class="step">
+          <div class="badge">2</div>
+          <h4>They get a budget range</h4>
+          <p>Realistic range to qualify comfort before the contractor invests time.</p>
+        </div>
+        <div class="step">
+          <div class="badge">3</div>
+          <h4>Confirm sends the lead</h4>
+          <p>By clicking confirm, their information is sent to the contractor who will be in touch shortly.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div>© 2026 ScopeGate • Built for contractors</div>
+      <div>Demo uses your Formspree endpoint for testing.</div>
+    </footer>
   </div>
 
-  <!-- Floating widget button -->
-  <button class="float-btn" type="button" onclick="openWidget()">
-    <span class="dot" aria-hidden="true"></span>
+  <!-- Floating button -->
+  <button class="floatBtn" id="openDemoFloat" aria-label="Open ScopeGate demo widget">
+    <span class="floatDot"></span>
     New project? Get a quick range
   </button>
 
-  <!-- Widget modal -->
-  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="ScopeGate Estimate Widget">
-    <div class="sheet">
-      <div class="sheet-head">
+  <!-- Modal -->
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modalHeader">
         <div>
-          <h4>Instant Basement Estimate</h4>
+          <h3 id="modalTitle">Instant Basement Estimate</h3>
           <p>See a realistic budget range. Confirm only if you’re comfortable.</p>
         </div>
-        <button class="x" type="button" onclick="closeWidget()" aria-label="Close">×</button>
+        <button class="x" id="closeModal" aria-label="Close">×</button>
       </div>
 
-      <div class="sheet-body">
-        <form id="leadForm" action="https://formspree.io/f/xnjbanbn" method="POST">
-          <div class="row2">
+      <div class="modalBody">
+        <form id="leadForm">
+          <div class="grid2">
             <div>
-              <label>Your name</label>
-              <input name="name" id="name" placeholder="John Smith" autocomplete="name" />
+              <label for="name">Your name</label>
+              <input id="name" name="name" placeholder="John Smith" autocomplete="name" />
             </div>
             <div>
-              <label>Postal code (optional)</label>
-              <input name="postal" id="postal" placeholder="T6E 0R4" autocomplete="postal-code" />
-            </div>
-          </div>
-
-          <label>Email (required to confirm & send)</label>
-          <input name="customer_email" id="email" placeholder="you@example.com" autocomplete="email" type="email" />
-
-          <div class="row2">
-            <div>
-              <label>Basement size (sq ft)</label>
-              <input name="size_sqft" id="sqft" placeholder="900" type="number" min="200" max="5000" />
-            </div>
-            <div>
-              <label>Finish level</label>
-              <select name="finish_level" id="finish">
-                <option value="Standard (most common)" selected>Standard (most common)</option>
-                <option value="Basic">Basic</option>
-                <option value="High-end">High-end</option>
-              </select>
+              <label for="postal">Postal code (optional)</label>
+              <input id="postal" name="postal" placeholder="T6E 0R4" autocomplete="postal-code" />
             </div>
           </div>
 
-          <div class="row2">
+          <div class="row">
+            <label for="email">Email (required to confirm & send)</label>
+            <input id="email" name="customer_email" placeholder="you@example.com" autocomplete="email" />
+          </div>
+
+          <!-- REQUIRED QUESTIONS YOU LISTED -->
+          <div class="grid2 row">
             <div>
-              <label>Ceiling</label>
-              <select name="ceiling_type" id="ceiling">
-                <option value="Drywall ceiling (finished)" selected>Drywall ceiling (finished)</option>
-                <option value="Open joists (unfinished)">Open joists (unfinished)</option>
-                <option value="Drop ceiling">Drop ceiling</option>
-              </select>
+              <label for="sqft">Basement size (sq ft)</label>
+              <input id="sqft" name="basement_sqft" type="number" min="200" step="25" placeholder="900" />
             </div>
             <div>
-              <label>Bathroom</label>
-              <select name="bathroom" id="bathroom">
-                <option value="None" selected>None</option>
-                <option value="Rough-in only">Rough-in only</option>
-                <option value="Full bathroom">Full bathroom</option>
+              <label for="ceiling">Ceiling type</label>
+              <select id="ceiling" name="ceiling_type">
+                <option value="open">Open ceiling (unfinished)</option>
+                <option value="drywall" selected>Drywall ceiling (finished)</option>
+                <option value="drop">Drop ceiling</option>
               </select>
             </div>
           </div>
 
-          <div class="row2">
+          <div class="grid2 row">
             <div>
-              <label>Timeline</label>
-              <select name="timeline" id="timeline">
-                <option value="ASAP">ASAP</option>
-                <option value="1–3 months" selected>1–3 months</option>
-                <option value="3–6 months">3–6 months</option>
-                <option value="6+ months">6+ months</option>
+              <label for="walls">Finished or unfinished walls?</label>
+              <select id="walls" name="walls_finish">
+                <option value="unfinished">Unfinished walls</option>
+                <option value="finished" selected>Finished walls</option>
               </select>
             </div>
             <div>
-              <label>Extras</label>
-              <select name="extras" id="extras">
-                <option value="None" selected>None</option>
-                <option value="Panel upgrade likely">Panel upgrade likely</option>
-                <option value="EV charger / future">EV charger / future</option>
-                <option value="Heated floors">Heated floors</option>
+              <label for="timeline">Timeline</label>
+              <select id="timeline" name="timeline">
+                <option value="asap">ASAP</option>
+                <option value="1-3" selected>1–3 months</option>
+                <option value="3-6">3–6 months</option>
+                <option value="6+">6+ months</option>
               </select>
             </div>
           </div>
 
-          <label>Describe the job (optional)</label>
-          <textarea name="details" id="details" rows="3" placeholder="Example: 900 sq ft basement finish, 12 pot lights, 2 new circuits, 1 bathroom rough-in."></textarea>
+          <div class="grid2 row">
+            <div>
+              <label for="standard">Build standard</label>
+              <select id="standard" name="build_standard">
+                <option value="basic">Basic</option>
+                <option value="standard" selected>Standard (most common)</option>
+                <option value="premium">Premium</option>
+              </select>
+            </div>
+            <div>
+              <label for="extras">Extras</label>
+              <select id="extras" name="extras">
+                <option value="none" selected>None</option>
+                <option value="panel">Panel / service changes possible</option>
+                <option value="heated">Heated floor / specialty loads</option>
+                <option value="ev">EV charger / future loads</option>
+              </select>
+            </div>
+          </div>
 
-          <!-- Hidden fields sent to contractor -->
-          <input type="hidden" name="_subject" id="subject" value="ScopeGate CONFIRMED Quote" />
-          <input type="hidden" name="estimate_range" id="estimate_range" value="" />
-          <input type="hidden" name="drivers" id="drivers" value="" />
+          <div class="grid2 row">
+            <div>
+              <label for="bathrooms">Number of bathrooms</label>
+              <input id="bathrooms" name="bathrooms_count" type="number" min="0" max="3" step="1" placeholder="0" />
+            </div>
+            <div>
+              <label for="bedrooms">Number of bedrooms</label>
+              <input id="bedrooms" name="bedrooms_count" type="number" min="0" max="5" step="1" placeholder="0" />
+            </div>
+          </div>
 
-          <button class="btn btn-primary full" type="button" onclick="generateEstimate()">Get Estimate</button>
+          <div class="row">
+            <label for="details">Describe the job (optional)</label>
+            <textarea id="details" name="details" placeholder="Example: 900 sq ft basement finish, 2 bedrooms, 1 bathroom, 12 pot lights, 2 new circuits."></textarea>
+          </div>
 
-          <div id="resultArea" style="display:none;">
-            <div class="result">
-              <p class="range" id="rangeText">$0 — $0</p>
-              <p class="drivers" id="driversText">Key cost drivers: —</p>
+          <div class="row">
+            <button type="button" class="btn primary btnFull" id="getEstimate">Get Estimate</button>
+          </div>
+
+          <div class="estimateBox" id="estimateBox">
+            <div class="range" id="rangeText">Estimated Range: —</div>
+
+            <div class="fineprint">
+              By clicking confirm, your information is sent to the contractor who will be in touch shortly.
             </div>
 
-            <div class="confirmBox" id="confirmBox" style="display:none;">
-              <p>
-                By clicking confirm, your information is sent to the contractor who will be in touch shortly.
-              </p>
-              <button class="btn-send" type="submit">Confirm & Send</button>
-              <button class="btn-deny" type="button" onclick="deny()">Not Interested</button>
+            <div class="actions">
+              <button type="button" class="btn primary btnFull" id="confirmSend">Confirm &amp; Send</button>
+              <button type="button" class="btn btnWarn btnFull" id="notInterested">Not Interested</button>
             </div>
 
-            <div class="subtle">
+            <div class="fineprint">
               This is a budget range for pre-qualification. Final quote requires a site visit.
             </div>
+
+            <div class="toast" id="toast"></div>
           </div>
+
+          <!-- Hidden fields for Formspree -->
+          <input type="hidden" name="_subject" id="subject" value="ScopeGate CONFIRMED Quote" />
+          <input type="hidden" name="estimate" id="estimateField" value="" />
         </form>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
-
   <script>
-    function openWidget(){
-      document.getElementById("modal").classList.add("open");
+    // ========= CONFIG =========
+    const FORMSPREE_URL = "https://formspree.io/f/xnjbanbn";
+
+    // Demo pricing model (replace later with real bidding logic)
+    const PRICING = {
+      base: 4200,
+      perSqFt: { basic: 7.2, standard: 9.2, premium: 12.2 },
+      ceilingAdd: { open: 0, drywall: 900, drop: 600 },
+      wallsAdd: { unfinished: 0, finished: 1200 },
+      bathroomEach: 3200,   // each additional bathroom adds cost in demo
+      bedroomEach: 1400,    // each bedroom adds cost in demo
+      timelineMul: { asap: 1.12, "1-3": 1.00, "3-6": 0.96, "6+": 0.92 },
+      extrasAdd: { none: 0, panel: 1800, heated: 1400, ev: 1200 },
+      lowMul: 0.90,
+      highMul: 1.15,
+      min: 2500
+    };
+
+    // ========= HELPERS =========
+    const $ = (id) => document.getElementById(id);
+
+    function fmt(n){
+      return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
     }
-    function closeWidget(){
-      document.getElementById("modal").classList.remove("open");
-    }
-    function scrollToHow(){
-      const el = document.getElementById("how");
-      if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
+    function clamp(n, min, max){
+      return Math.max(min, Math.min(max, n));
     }
 
-    // Click outside sheet closes modal
-    document.getElementById("modal").addEventListener("click", (e)=>{
-      if(e.target.id === "modal") closeWidget();
+    // ========= MODAL OPEN/CLOSE =========
+    const overlay = $("overlay");
+
+    function openModal(){
+      overlay.classList.add("open");
+      setTimeout(() => $("name").focus(), 50);
+    }
+    function closeModal(){
+      overlay.classList.remove("open");
+    }
+
+    $("openDemoTop").addEventListener("click", openModal);
+    $("openDemoFloat").addEventListener("click", openModal);
+    $("closeModal").addEventListener("click", closeModal);
+
+    overlay.addEventListener("click", (e) => {
+      if(e.target === overlay) closeModal();
     });
 
-    function toast(msg, ok=true){
-      const t=document.getElementById("toast");
-      t.innerHTML = (ok ? "<span class='ok'>✓</span> " : "<span class='bad'>✕</span> ") + msg;
-      t.classList.add("show");
-      setTimeout(()=>t.classList.remove("show"), 2600);
+    window.addEventListener("keydown", (e) => {
+      if(e.key === "Escape" && overlay.classList.contains("open")) closeModal();
+    });
+
+    // ========= ESTIMATE LOGIC =========
+    const estimateBox = $("estimateBox");
+    const rangeText = $("rangeText");
+    const estimateField = $("estimateField");
+    const toast = $("toast");
+
+    function calcEstimate(){
+      const sqftRaw = parseFloat($("sqft").value || "0");
+      const sqft = clamp(isNaN(sqftRaw) ? 0 : sqftRaw, 200, 6000);
+
+      const ceiling = $("ceiling").value;
+      const walls = $("walls").value;
+      const timeline = $("timeline").value;
+      const standard = $("standard").value;
+      const extras = $("extras").value;
+
+      const bathsRaw = parseInt($("bathrooms").value || "0", 10);
+      const bedsRaw = parseInt($("bedrooms").value || "0", 10);
+      const bathrooms = clamp(isNaN(bathsRaw) ? 0 : bathsRaw, 0, 3);
+      const bedrooms = clamp(isNaN(bedsRaw) ? 0 : bedsRaw, 0, 5);
+
+      let est = PRICING.base;
+
+      const perSq = PRICING.perSqFt[standard] || PRICING.perSqFt.standard;
+      est += sqft * perSq;
+
+      est += (PRICING.ceilingAdd[ceiling] || 0);
+      est += (PRICING.wallsAdd[walls] || 0);
+
+      est += bathrooms * PRICING.bathroomEach;
+      est += bedrooms * PRICING.bedroomEach;
+
+      est += (PRICING.extrasAdd[extras] || 0);
+
+      est *= (PRICING.timelineMul[timeline] || 1.0);
+
+      est = Math.max(PRICING.min, est);
+
+      const low = Math.round(est * PRICING.lowMul);
+      const high = Math.round(est * PRICING.highMul);
+      return { low, high };
     }
 
-    function money(n){
-      return n.toLocaleString(undefined,{maximumFractionDigits:0});
-    }
+    $("getEstimate").addEventListener("click", () => {
+      const { low, high } = calcEstimate();
+      rangeText.textContent = `Estimated Range: $${fmt(low)} – $${fmt(high)}`;
+      estimateField.value = `$${fmt(low)} – $${fmt(high)}`;
+      estimateBox.classList.add("open");
+      toast.className = "toast";
+      toast.textContent = "";
+    });
 
-    function generateEstimate(){
-      // Basic inputs
-      const sqft = parseInt(document.getElementById("sqft").value || "0", 10);
-      const finish = document.getElementById("finish").value;
-      const ceiling = document.getElementById("ceiling").value;
-      const bathroom = document.getElementById("bathroom").value;
-      const timeline = document.getElementById("timeline").value;
-      const extras = document.getElementById("extras").value;
+    // ========= CONFIRM / NOT INTERESTED =========
+    $("notInterested").addEventListener("click", () => {
+      closeModal();
+    });
 
-      if(!sqft || sqft < 200){
-        toast("Enter a realistic sq ft (200+).", false);
+    $("confirmSend").addEventListener("click", async () => {
+      toast.className = "toast";
+      toast.textContent = "";
+
+      const email = ($("email").value || "").trim();
+      if(!email || !email.includes("@")){
+        toast.className = "toast err";
+        toast.textContent = "Please enter a valid email to confirm & send.";
+        $("email").focus();
         return;
       }
 
-      // ---- Demo pricing model (placeholder) ----
-      // Start with a base per-sqft, then add multipliers and adders.
-      let basePerSqft = 20; // placeholder
-      let finishMult = 1.0;
+      const form = $("leadForm");
+      const data = new FormData(form);
 
-      if(finish === "Basic") finishMult = 0.92;
-      if(finish === "Standard (most common)") finishMult = 1.00;
-      if(finish === "High-end") finishMult = 1.20;
+      const est = estimateField.value || "Estimate generated";
+      $("subject").value = `ScopeGate CONFIRMED Quote — ${est}`;
 
-      let ceilingAdd = 0;
-      if(ceiling === "Open joists (unfinished)") ceilingAdd = -1200;
-      if(ceiling === "Drop ceiling") ceilingAdd = 1600;
+      try{
+        const res = await fetch(FORMSPREE_URL, {
+          method: "POST",
+          body: data,
+          headers: { "Accept": "application/json" }
+        });
+        if(!res.ok) throw new Error("Formspree error");
 
-      let bathAdd = 0;
-      if(bathroom === "Rough-in only") bathAdd = 4500;
-      if(bathroom === "Full bathroom") bathAdd = 12000;
-
-      let timelineAdd = 0;
-      if(timeline === "ASAP") timelineAdd = 2200;
-
-      let extrasAdd = 0;
-      if(extras === "Panel upgrade likely") extrasAdd = 3500;
-      if(extras === "EV charger / future") extrasAdd = 1800;
-      if(extras === "Heated floors") extrasAdd = 2400;
-
-      const mid = Math.max(
-        1500,
-        (sqft * basePerSqft * finishMult) + ceilingAdd + bathAdd + timelineAdd + extrasAdd
-      );
-
-      // Range spread (demo)
-      const low = Math.round(mid * 0.85 / 50) * 50;
-      const high = Math.round(mid * 1.18 / 50) * 50;
-
-      // Drivers list (demo)
-      const drivers = [];
-      drivers.push(`${sqft} sq ft`);
-      drivers.push(finish);
-      if(bathroom !== "None") drivers.push(bathroom);
-      if(ceiling !== "Drywall ceiling (finished)") drivers.push(ceiling);
-      if(timeline === "ASAP") drivers.push("ASAP timeline");
-      if(extras !== "None") drivers.push(extras);
-
-      // Show UI
-      document.getElementById("resultArea").style.display = "block";
-      document.getElementById("rangeText").textContent = `$${money(low)} — $${money(high)}`;
-      document.getElementById("driversText").textContent = `Key cost drivers: ${drivers.join(" • ")}`;
-
-      // Set hidden fields for email payload
-      document.getElementById("estimate_range").value = `$${money(low)} — $${money(high)}`;
-      document.getElementById("drivers").value = drivers.join(" | ");
-
-      // Require email for confirm
-      const email = document.getElementById("email").value.trim();
-      if(!email){
-        document.getElementById("confirmBox").style.display = "none";
-        toast("Add your email to confirm & send.", false);
-        return;
+        toast.className = "toast ok";
+        toast.textContent = "Sent. The contractor will be in touch shortly.";
+        setTimeout(() => closeModal(), 900);
+      }catch(err){
+        toast.className = "toast err";
+        toast.textContent = "Something went wrong sending. Please try again.";
       }
-
-      document.getElementById("confirmBox").style.display = "block";
-      toast("Estimate generated. Confirm to send.", true);
-    }
-
-    function deny(){
-      // Truly does nothing (no send). Just closes the confirm UI.
-      document.getElementById("confirmBox").style.display = "none";
-      toast("No worries — nothing was sent.", true);
-    }
+    });
   </script>
 </body>
 </html>
+
