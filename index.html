@@ -4,456 +4,395 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ScopeGate — Demo Widget</title>
-  <meta name="description" content="ScopeGate: a plug-and-play estimate widget for contractor websites. Show a realistic range, then only send confirmed leads." />
+  <meta name="description" content="ScopeGate: a plug-and-play estimate widget that pre-qualifies leads." />
 
   <style>
     :root{
-      --bg:#0b0f1a;
-      --panel:rgba(255,255,255,.06);
-      --panel2:rgba(255,255,255,.08);
-      --border:rgba(255,255,255,.14);
-      --text:rgba(255,255,255,.92);
-      --muted:rgba(255,255,255,.68);
-      --soft:rgba(255,255,255,.10);
-      --shadow:0 18px 60px rgba(0,0,0,.55);
-      --r:18px;
-
-      --accent:#f3a526; /* warm orange */
-      --accent2:#ffcc6a;
-      --good:#57d67b;
+      --bg0:#070b16;
+      --bg1:#0b1226;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.08);
+      --border: rgba(255,255,255,.14);
+      --txt: rgba(255,255,255,.92);
+      --mut: rgba(255,255,255,.68);
+      --mut2: rgba(255,255,255,.52);
+      --brand:#f3a526;
+      --brand2:#ffcc66;
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --r: 18px;
+      --max: 1080px;
     }
 
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
     body{
       margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      color:var(--text);
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      color:var(--txt);
+      /* No “seam”: single smooth background stack */
       background:
-        radial-gradient(1200px 650px at 16% 10%, rgba(72,125,255,.32), transparent 60%),
-        radial-gradient(950px 520px at 78% 14%, rgba(255,155,60,.25), transparent 62%),
-        radial-gradient(900px 600px at 40% 85%, rgba(120,255,220,.08), transparent 60%),
-        var(--bg);
-      overflow-x:hidden;
+        radial-gradient(1100px 700px at 18% 8%, rgba(72,125,255,.30), transparent 55%),
+        radial-gradient(900px 600px at 82% 18%, rgba(255,155,60,.18), transparent 58%),
+        radial-gradient(900px 700px at 65% 90%, rgba(120,220,255,.10), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
     }
 
-    /* subtle noise */
-    body:before{
-      content:"";
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
-      opacity:.22;
-      mix-blend-mode:overlay;
-    }
+    a{ color:inherit; }
+    .wrap{ max-width:var(--max); margin:0 auto; padding:34px 18px 120px; }
 
-    .wrap{
-      max-width:1140px;
-      margin:0 auto;
-      padding:34px 22px 90px;
-      position:relative;
-      z-index:1;
-    }
-
-    /* header */
+    /* Header */
     .top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:14px;
-      margin-bottom:34px;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:14px; margin-bottom:18px;
     }
     .brand{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      font-weight:700;
-      letter-spacing:.2px;
+      display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px;
     }
     .logo{
-      width:26px;height:26px;border-radius:8px;
-      background:linear-gradient(135deg, rgba(255,189,92,.95), rgba(88,140,255,.85));
-      box-shadow:0 10px 24px rgba(0,0,0,.35);
+      width:28px; height:28px; border-radius:10px;
+      background: radial-gradient(10px 10px at 30% 30%, rgba(255,255,255,.35), transparent 55%),
+                  linear-gradient(135deg, rgba(243,165,38,.95), rgba(72,125,255,.75));
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
     }
     .pill{
       font-size:12px;
+      color: rgba(255,255,255,.75);
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.05);
       padding:8px 12px;
       border-radius:999px;
-      border:1px solid var(--border);
-      background:rgba(0,0,0,.18);
-      color:var(--muted);
-      white-space:nowrap;
+      backdrop-filter: blur(10px);
     }
 
-    /* hero grid */
+    /* Hero */
     .hero{
       display:grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap:22px;
-      align-items:stretch;
+      grid-template-columns: 1.25fr .75fr;
+      gap:16px;
+      margin-top:10px;
     }
-    @media (max-width: 980px){
+    @media (max-width: 920px){
       .hero{ grid-template-columns:1fr; }
     }
 
     .card{
       border:1px solid var(--border);
-      background:var(--panel);
-      border-radius:var(--r);
-      box-shadow:var(--shadow);
-      overflow:hidden;
+      background: rgba(255,255,255,.05);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+    .heroLeft{ padding:22px 22px 18px; }
+    .kicker{
+      font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+      color:rgba(255,255,255,.65);
+      margin:0 0 10px;
+    }
+    h1{
+      margin:0 0 10px;
+      font-size:44px;
+      line-height:1.02;
+      letter-spacing:-.02em;
+    }
+    h1 .accent{ color: var(--brand); }
+    .sub{
+      margin:0 0 18px;
+      color: var(--mut);
+      max-width: 60ch;
+      font-size:14px;
+      line-height:1.5;
     }
 
-    .heroLeft{
-      padding:26px;
-      position:relative;
-    }
-    .kicker{
-      font-size:12px;
-      letter-spacing:.12em;
-      color:var(--muted);
-      text-transform:uppercase;
-      margin-bottom:10px;
-    }
-    .h1{
-      font-size:44px;
-      line-height:1.06;
-      margin:0 0 10px;
-      font-weight:800;
-    }
-    .h1 .warm{ color:var(--accent2); }
-    .sub{
-      color:var(--muted);
-      font-size:15px;
-      line-height:1.55;
-      max-width:62ch;
-      margin:0 0 16px;
-    }
-    .ctaRow{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:center;
-      margin-top:14px;
-    }
+    .ctaRow{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
     .btn{
-      border:none;
-      cursor:pointer;
-      border-radius:12px;
+      appearance:none; border:1px solid transparent;
+      border-radius: 12px;
       padding:11px 14px;
       font-weight:700;
+      cursor:pointer;
       font-size:13px;
-      transition:.15s ease;
     }
-    .btn.primary{
-      background:linear-gradient(180deg, var(--accent2), var(--accent));
-      color:#151515;
-      box-shadow:0 12px 28px rgba(243,165,38,.24);
+    .btnPrimary{
+      background: linear-gradient(180deg, rgba(243,165,38,.98), rgba(230,140,18,.98));
+      color: rgba(10,12,18,.95);
+      box-shadow: 0 16px 40px rgba(243,165,38,.16);
     }
-    .btn.primary:hover{ transform:translateY(-1px); }
-    .btn.ghost{
-      background:rgba(0,0,0,.18);
-      border:1px solid var(--border);
-      color:var(--text);
+    .btnGhost{
+      background: rgba(255,255,255,.06);
+      border-color: var(--border);
+      color: rgba(255,255,255,.88);
     }
-    .tiny{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:10px;
+    .tinyNote{
+      margin-top:10px; font-size:12px; color: var(--mut2);
     }
 
-    .miniCards{
+    .features{
       display:grid;
-      grid-template-columns:repeat(3, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap:12px;
-      margin-top:18px;
+      margin-top:16px;
     }
-    @media (max-width: 720px){
-      .miniCards{ grid-template-columns:1fr; }
+    @media (max-width: 920px){
+      .features{ grid-template-columns:1fr; }
     }
-    .mini{
+    .feature{
       padding:14px;
-      border-radius:14px;
+      border-radius: 16px;
       border:1px solid var(--border);
-      background:rgba(0,0,0,.18);
+      background: rgba(255,255,255,.04);
     }
-    .mini b{ display:block; margin-bottom:6px; }
-    .mini span{ color:var(--muted); font-size:12px; line-height:1.4; }
+    .feature h3{ margin:0 0 6px; font-size:14px; }
+    .feature p{ margin:0; font-size:12px; color: var(--mut); line-height:1.45; }
 
-    /* right info panel */
-    .heroRight{
-      padding:18px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-    .panelTitle{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:2px;
-    }
-    .panelTitle b{ font-size:13px; }
-    .grid2{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
-    .box{
-      padding:14px;
-      border-radius:14px;
-      border:1px dashed rgba(255,255,255,.18);
-      background:rgba(0,0,0,.16);
-    }
-    .box b{ font-size:12px; display:block; margin-bottom:8px; color:rgba(255,255,255,.86); }
-    ul{
-      margin:0; padding-left:16px;
-      color:var(--muted);
+    .heroRight{ padding:18px; }
+    .heroRight h3{ margin:0 0 10px; font-size:13px; letter-spacing:.02em; color: rgba(255,255,255,.86); }
+    .list{
+      margin:0; padding:0 0 0 18px;
+      color: var(--mut);
       font-size:12px;
-      line-height:1.6;
+      line-height:1.55;
     }
-    .emailBox{
-      padding:14px;
-      border-radius:14px;
-      border:1px solid var(--border);
-      background:rgba(0,0,0,.18);
-    }
-    .emailBox b{ font-size:12px; }
-    .emailBox .row{
-      display:flex; gap:10px; flex-wrap:wrap;
-      margin-top:10px;
-      color:var(--muted);
-      font-size:12px;
-    }
-    .dot{
-      width:8px;height:8px;border-radius:50%;
-      background:var(--good);
-      margin-top:5px;
-      box-shadow:0 0 0 4px rgba(87,214,123,.14);
-    }
-    .rowItem{
-      display:flex; gap:8px; align-items:flex-start;
-    }
+    .list li{ margin:6px 0; }
 
-    /* how it works (NO seam line) */
+    /* How it works */
     .how{
-      margin-top:22px;
-      display:grid;
-      grid-template-columns:repeat(3, 1fr);
-      gap:12px;
+      margin-top:18px;
+      padding:18px;
     }
-    @media (max-width: 980px){
-      .how{ grid-template-columns:1fr; }
+    .howGrid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+      margin-top:12px;
+    }
+    @media (max-width: 920px){
+      .howGrid{ grid-template-columns:1fr; }
     }
     .step{
-      padding:16px;
-      border-radius:14px;
       border:1px solid var(--border);
-      background:rgba(0,0,0,.18);
-      position:relative;
+      border-radius:16px;
+      padding:14px;
+      background: rgba(255,255,255,.04);
     }
-    .num{
-      width:26px;height:26px;border-radius:9px;
-      display:grid;place-items:center;
-      background:rgba(243,165,38,.18);
+    .stepNum{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:26px; height:26px;
+      border-radius: 10px;
+      background: rgba(243,165,38,.18);
       border:1px solid rgba(243,165,38,.35);
-      color:rgba(255,255,255,.92);
+      color: rgba(255,255,255,.92);
       font-weight:800;
       font-size:12px;
-      margin-bottom:10px;
+      margin-bottom:8px;
     }
-    .step b{ display:block; margin-bottom:6px; }
-    .step span{ color:var(--muted); font-size:12px; line-height:1.45; display:block; }
+    .step h4{ margin:0 0 6px; font-size:14px; }
+    .step p{ margin:0; font-size:12px; color: var(--mut); line-height:1.5; }
 
-    .footer{
+    footer{
       margin-top:18px;
-      color:rgba(255,255,255,.55);
+      color: rgba(255,255,255,.52);
       font-size:12px;
       display:flex;
       justify-content:space-between;
-      gap:12px;
+      gap:10px;
       flex-wrap:wrap;
     }
 
-    /* ================================
-       FLOATING WIDGET (side panel, non-modal)
-       ================================ */
-
-    #sg-launch{
-      position:fixed;
-      right:22px;
-      bottom:22px;
-      z-index:9999;
-      border:none;
+    /* Floating widget button */
+    .floatBtn{
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 9999;
+      border:0;
       cursor:pointer;
-      border-radius:999px;
-      padding:12px 16px;
-      font-weight:800;
-      color:#141414;
-      background:linear-gradient(180deg, var(--accent2), var(--accent));
-      box-shadow:0 18px 40px rgba(243,165,38,.22);
+      border-radius: 999px;
+      padding: 12px 14px;
       display:flex;
-      gap:10px;
       align-items:center;
+      gap:10px;
+      color: rgba(10,12,18,.95);
+      background: linear-gradient(180deg, rgba(243,165,38,.98), rgba(230,140,18,.98));
+      box-shadow: 0 18px 50px rgba(0,0,0,.55);
+      font-weight: 800;
+      font-size: 13px;
     }
-    #sg-launch:active{ transform:translateY(1px); }
-    .spark{
-      width:10px;height:10px;border-radius:50%;
-      background:rgba(0,0,0,.25);
-      box-shadow:0 0 0 4px rgba(0,0,0,.12);
+    .dot{
+      width:10px; height:10px; border-radius:999px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 0 0 4px rgba(255,255,255,.20);
     }
 
-    #sg-panel{
-      position:fixed;
-      right:-420px;
-      bottom:88px;
-      width:380px;
-      max-width:calc(100vw - 42px);
-      height:560px;
-      max-height:calc(100vh - 140px);
-      z-index:9998;
-      border-radius:18px;
-      border:1px solid var(--border);
-      background:rgba(12,16,28,.92);
-      backdrop-filter: blur(10px);
-      box-shadow:0 24px 80px rgba(0,0,0,.65);
-      transition: right .28s ease;
+    /* Side widget panel */
+    .widgetPanel{
+      position: fixed;
+      right: 18px;
+      bottom: 72px;
+      width: 380px;
+      max-width: calc(100vw - 36px);
+      max-height: 78vh;
+      z-index: 10000;
+      display:none;
       overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      pointer-events:auto;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: rgba(12,16,30,.92);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
     }
-    #sg-panel.open{ right:22px; }
-
-    .sgHead{
-      padding:14px 14px 12px;
-      border-bottom:1px solid var(--soft);
+    .widgetPanel.open{ display:block; }
+    .widgetHead{
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
       display:flex;
+      align-items:flex-start;
       justify-content:space-between;
-      align-items:center;
       gap:10px;
-      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.00));
     }
-    .sgHead b{ font-size:13px; }
-    .sgHead span{ font-size:12px; color:var(--muted); display:block; margin-top:2px; }
-    .sgClose{
-      border:none;
-      background:rgba(255,255,255,.08);
-      border:1px solid var(--border);
-      color:rgba(255,255,255,.85);
-      border-radius:12px;
-      padding:8px 10px;
+    .widgetHead h3{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.01em;
+    }
+    .widgetHead p{
+      margin:4px 0 0;
+      font-size:12px;
+      color: var(--mut);
+      line-height:1.35;
+    }
+    .closeX{
+      width:36px; height:36px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.88);
       cursor:pointer;
+      flex: 0 0 auto;
     }
-
-    .sgBody{
-      padding:14px;
+    .widgetBody{
+      padding: 12px 14px 14px;
       overflow:auto;
-      flex:1;
+      max-height: calc(78vh - 70px);
     }
 
-    .fieldRow{
+    /* Form styling */
+    .grid2{
       display:grid;
-      grid-template-columns:1fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap:10px;
     }
-    @media (max-width: 420px){
-      .fieldRow{ grid-template-columns:1fr; }
-    }
-
+    .grid1{ display:grid; gap:10px; }
     label{
       display:block;
       font-size:12px;
-      color:var(--muted);
+      color: rgba(255,255,255,.78);
       margin-bottom:6px;
+      font-weight:700;
     }
-    input, select, textarea{
+    .field{ margin-bottom:10px; }
+    input, textarea{
       width:100%;
       border-radius:12px;
-      border:1px solid var(--border);
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.92);
+      padding:10px 12px;
+      font-size:13px;
+      outline:none;
+    }
+    textarea{ min-height: 84px; resize: vertical; }
+    input::placeholder, textarea::placeholder{ color: rgba(255,255,255,.40); }
+
+    .hint{
+      font-size:11px;
+      color: rgba(255,255,255,.55);
+      margin-top:6px;
+      line-height:1.35;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .btnWide{ flex: 1 1 auto; }
+
+    .rangeBox{
+      margin-top:10px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      padding: 10px 12px;
+    }
+    .rangeTitle{
+      font-size:12px;
+      color: rgba(255,255,255,.78);
+      margin:0 0 6px;
+      font-weight:800;
+    }
+    .rangeValue{
+      margin:0;
+      font-size:13px;
+      font-weight:900;
+      letter-spacing:.01em;
+    }
+
+    /* Custom dropdown (fixes the white/blank native select menu) */
+    .dd{ position:relative; }
+    .ddBtn{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.06);
       color:rgba(255,255,255,.92);
       padding:10px 12px;
-      outline:none;
-    }
-    textarea{ resize:none; }
-
-    .hint{
-      font-size:12px;
-      color:rgba(255,255,255,.60);
-      margin:10px 0 10px;
-      line-height:1.35;
-    }
-
-    .sgBtn{
-      width:100%;
-      border:none;
       cursor:pointer;
+      font-size:13px;
+      text-align:left;
+    }
+    .ddBtn:focus{ outline:none; border-color: rgba(255,255,255,.28); }
+    .ddChevron{ opacity:.75; }
+
+    .ddMenu{
+      position:absolute;
+      left:0; right:0;
+      top:calc(100% + 8px);
       border-radius:12px;
-      padding:12px 14px;
-      font-weight:900;
-      margin-top:10px;
-      background:linear-gradient(180deg, var(--accent2), var(--accent));
-      color:#151515;
-    }
-    .sgBtn.secondary{
-      margin-top:8px;
-      background:rgba(255,255,255,.05);
-      border:1px solid var(--border);
-      color:rgba(255,255,255,.85);
-      font-weight:800;
-    }
-
-    .rangeBox{
-      margin-top:12px;
-      padding:12px;
-      border-radius:14px;
-      border:1px solid rgba(243,165,38,.35);
-      background:rgba(243,165,38,.10);
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(16,22,41,.98);
+      box-shadow: 0 18px 50px rgba(0,0,0,.55);
+      overflow:hidden;
       display:none;
+      z-index:99999;
+      max-height: 220px;
+      overflow:auto;
     }
-    .rangeTop{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:center;
-      margin-bottom:6px;
-    }
-    .rangeTop b{ font-size:13px; }
-    .rangeTop small{ color:rgba(255,255,255,.65); font-size:12px; }
-    .rangeNum{
-      font-weight:1000;
-      letter-spacing:.2px;
-      font-size:14px;
-    }
+    .dd.open .ddMenu{ display:block; }
 
-    .error{
-      display:none;
-      margin-top:10px;
+    .ddItem{
       padding:10px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,90,90,.35);
-      background:rgba(255,90,90,.12);
-      color:rgba(255,255,255,.88);
-      font-size:12px;
-      line-height:1.35;
+      font-size:13px;
+      color:rgba(255,255,255,.92);
+      cursor:pointer;
+      background:transparent;
     }
+    .ddItem:hover{ background: rgba(255,255,255,.08); }
+    .ddItem.active{ background: rgba(243,165,38,.18); }
 
-    .ok{
-      display:none;
+    .statusMsg{
       margin-top:10px;
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid rgba(87,214,123,.35);
-      background:rgba(87,214,123,.10);
-      color:rgba(255,255,255,.90);
       font-size:12px;
-      line-height:1.35;
+      color: rgba(255,255,255,.75);
     }
-
-    /* IMPORTANT: page stays usable (no overlay) */
+    .ok{ color: rgba(120,255,180,.85); }
+    .bad{ color: rgba(255,140,140,.88); }
   </style>
 </head>
 
@@ -464,392 +403,460 @@
         <div class="logo"></div>
         <div>ScopeGate</div>
       </div>
-      <div class="pill">Estimate → Confirm → Sent</div>
+      <div class="pill">Demo • Widget-first • No AI (yet)</div>
     </div>
 
     <div class="hero">
-      <!-- LEFT -->
       <div class="card heroLeft">
-        <div class="kicker">Made for contractors</div>
-        <h1 class="h1">Stop wasting time on <span class="warm">unqualified leads.</span></h1>
+        <p class="kicker">MADE FOR CONTRACTORS</p>
+        <h1>Stop wasting time on <span class="accent">unqualified leads.</span></h1>
         <p class="sub">
-          ScopeGate is a plug-and-play estimate widget for contractor websites.
-          It shows customers a realistic budget range based on scope — then only sends the lead if they’re comfortable with it.
+          ScopeGate is a plug-and-play estimate widget for contractor websites. It shows customers a realistic budget
+          range based on scope — then only sends the lead if they’re comfortable with it.
         </p>
 
         <div class="ctaRow">
-          <button class="btn primary" id="openWidgetTop">Open Demo Widget</button>
-          <button class="btn ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">See how it works</button>
+          <button class="btn btnPrimary" id="openWidgetTop">Open Demo Widget</button>
+          <a class="btn btnGhost" href="#how">See how it works</a>
         </div>
 
-        <div class="tiny">One file. No build steps. Drop-in widget style demo below (and the floating button is live).</div>
+        <div class="tinyNote">
+          One file. No build steps. Drop-in widget style demo below (and the floating button is live).
+        </div>
 
-        <div class="miniCards">
-          <div class="mini">
-            <b>Pre-qualifies before the call</b>
-            <span>Customers see a range and self-select before you waste a site visit.</span>
+        <div class="features">
+          <div class="feature">
+            <h3>Pre-qualifies before the call</h3>
+            <p>Customers see a range and self-select before you waste a site visit.</p>
           </div>
-          <div class="mini">
-            <b>Captures scope + contact</b>
-            <span>You get the basics you need: scope, timeline, and budget comfort.</span>
+          <div class="feature">
+            <h3>Captures scope + contact</h3>
+            <p>You get the basics you need: scope, timeline, and budget comfort.</p>
           </div>
-          <div class="mini">
-            <b>Feels native on any site</b>
-            <span>Floating button + side panel. Clean. Fast. Doesn’t block the page.</span>
+          <div class="feature">
+            <h3>Feels native on any site</h3>
+            <p>Floating button + slide-out panel. Clean. Fast. Doesn’t clutter the page.</p>
           </div>
         </div>
       </div>
 
-      <!-- RIGHT -->
       <div class="card heroRight">
-        <div class="panelTitle">
-          <b>What the customer provides</b>
-          <div class="pill" style="padding:6px 10px;">Basement demo</div>
-        </div>
-
-        <div class="grid2">
-          <div class="box">
-            <b>CUSTOMER ENTERS</b>
-            <ul>
-              <li>Name + email</li>
-              <li>Basement size</li>
-              <li>Ceiling + wall finish</li>
-              <li>Bedrooms + bathrooms</li>
-              <li>Timeline + extras</li>
-            </ul>
-          </div>
-          <div class="box">
-            <b>SCOPEGATE RETURNS</b>
-            <ul>
-              <li>Estimated range (low–high)</li>
-              <li>Key cost drivers included</li>
-              <li>Confirm / Not Interested gate</li>
-              <li>Only confirmed leads are sent</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="emailBox">
-          <b>Contractor email includes</b>
-          <div class="row">
-            <div class="rowItem"><div class="dot"></div><div>Customer contact info</div></div>
-            <div class="rowItem"><div class="dot"></div><div>Scope answers + timeline</div></div>
-            <div class="rowItem"><div class="dot"></div><div>Confirmed budget range</div></div>
-          </div>
-        </div>
+        <h3>What the contractor receives</h3>
+        <ul class="list">
+          <li>Customer name + email</li>
+          <li>Basement size + build standard</li>
+          <li>Ceiling type + finished/unfinished walls</li>
+          <li>Bathrooms + bedrooms</li>
+          <li>Timeline + notes</li>
+          <li>Estimated range (low–high)</li>
+          <li>Only confirmed leads are sent</li>
+        </ul>
       </div>
     </div>
 
-    <div id="how" class="how">
-      <div class="step">
-        <div class="num">1</div>
-        <b>Customer describes the job</b>
-        <span>Just enough detail to price a realistic range.</span>
+    <div class="card how" id="how">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+        <div>
+          <div class="kicker" style="margin:0 0 6px;">HOW IT WORKS</div>
+          <div style="font-size:14px;color:rgba(255,255,255,.86);font-weight:800;">
+            From website visitor → “here’s your rough number” in minutes.
+          </div>
+        </div>
+        <div class="pill">Estimate → Confirm → Sent</div>
       </div>
-      <div class="step">
-        <div class="num">2</div>
-        <b>They get a budget range</b>
-        <span>No surprises. No wasted calls.</span>
-      </div>
-      <div class="step">
-        <div class="num">3</div>
-        <b>Confirm sends the lead</b>
-        <span>By clicking confirm, their information is sent to the contractor who will be in touch shortly.</span>
-      </div>
-    </div>
 
-    <div class="footer">
-      <div>© 2026 ScopeGate • Built for contractors</div>
-      <div style="color:rgba(255,255,255,.55)">Demo uses your Formspree endpoint for testing.</div>
+      <div class="howGrid">
+        <div class="step">
+          <div class="stepNum">1</div>
+          <h4>Customer describes the job</h4>
+          <p>Just enough detail to price a realistic range.</p>
+        </div>
+        <div class="step">
+          <div class="stepNum">2</div>
+          <h4>They get a budget range</h4>
+          <p>No surprises. No wasted calls.</p>
+        </div>
+        <div class="step">
+          <div class="stepNum">3</div>
+          <h4>Confirm sends the lead</h4>
+          <p>By clicking confirm, their information is sent to the contractor who will be in touch shortly.</p>
+        </div>
+      </div>
+
+      <footer>
+        <div>© 2026 ScopeGate • Built for contractors</div>
+        <div>Demo uses your Formspree endpoint for testing</div>
+      </footer>
     </div>
   </div>
 
-  <!-- Floating launcher -->
-  <button id="sg-launch" type="button">
-    <span class="spark"></span>
+  <!-- Floating button -->
+  <button class="floatBtn" id="floatBtn" type="button">
+    <span class="dot"></span>
     New project? Get a quick range
   </button>
 
-  <!-- Side widget panel (non-modal) -->
-  <aside id="sg-panel" aria-hidden="true">
-    <div class="sgHead">
+  <!-- Widget panel -->
+  <div class="widgetPanel" id="widgetPanel" aria-hidden="true">
+    <div class="widgetHead">
       <div>
-        <b>Instant Basement Estimate</b>
-        <span>See a realistic range. Confirm only if you’re comfortable.</span>
+        <h3>Instant Basement Estimate</h3>
+        <p>See a realistic budget range. Confirm only if you’re comfortable.</p>
       </div>
-      <button class="sgClose" type="button" id="sg-close">✕</button>
+      <button class="closeX" id="closeWidget" type="button" aria-label="Close">✕</button>
     </div>
 
-    <div class="sgBody">
-      <div class="fieldRow">
-        <div>
-          <label>Your name</label>
-          <input id="sg_name" placeholder="John Smith" />
+    <div class="widgetBody">
+      <div class="grid2">
+        <div class="field">
+          <label for="sg_name">Your name</label>
+          <input id="sg_name" placeholder="John Smith" autocomplete="name" />
         </div>
-        <div>
-          <label>Postal code (optional)</label>
-          <input id="sg_postal" placeholder="T6E 0R4" />
+        <div class="field">
+          <label for="sg_postal">Postal code (optional)</label>
+          <input id="sg_postal" placeholder="T6E 0R4" autocomplete="postal-code" />
         </div>
       </div>
 
-      <div>
-        <label>Email (required to confirm & send)</label>
-        <input id="sg_email" placeholder="you@example.com" />
+      <div class="field">
+        <label for="sg_email">Email (required to confirm &amp; send)</label>
+        <input id="sg_email" placeholder="you@example.com" autocomplete="email" />
       </div>
 
-      <div class="fieldRow">
-        <div>
-          <label>Basement size (sq ft)</label>
-          <input id="sg_size" type="number" min="0" placeholder="900" />
+      <div class="grid2">
+        <div class="field">
+          <label for="sg_size">Basement size (sq ft)</label>
+          <input id="sg_size" type="number" min="100" step="50" placeholder="900" />
         </div>
-        <div>
+
+        <div class="field">
           <label>Ceiling type</label>
-          <select id="sg_ceiling">
-            <option>Drywall ceiling (finished)</option>
-            <option>Drop ceiling</option>
-            <option>Open joist</option>
-          </select>
+          <div class="dd" data-dd="ceiling">
+            <button class="ddBtn" type="button" aria-haspopup="listbox" aria-expanded="false">
+              <span class="ddLabel">Drywall ceiling (finished)</span>
+              <span class="ddChevron">▾</span>
+            </button>
+            <div class="ddMenu" role="listbox" tabindex="-1">
+              <div class="ddItem active" role="option" data-value="Drywall ceiling (finished)">Drywall ceiling (finished)</div>
+              <div class="ddItem" role="option" data-value="Open ceiling (exposed)">Open ceiling (exposed)</div>
+              <div class="ddItem" role="option" data-value="Drop ceiling (T-bar)">Drop ceiling (T-bar)</div>
+              <div class="ddItem" role="option" data-value="Mixed / unsure">Mixed / unsure</div>
+            </div>
+          </div>
+          <input type="hidden" id="sg_ceiling" value="Drywall ceiling (finished)" />
         </div>
       </div>
 
-      <div class="fieldRow">
-        <div>
+      <div class="grid2">
+        <div class="field">
           <label>Finished or unfinished walls?</label>
-          <select id="sg_walls">
-            <option>Finished walls</option>
-            <option>Unfinished walls</option>
-          </select>
+          <div class="dd" data-dd="walls">
+            <button class="ddBtn" type="button" aria-haspopup="listbox" aria-expanded="false">
+              <span class="ddLabel">Finished walls</span>
+              <span class="ddChevron">▾</span>
+            </button>
+            <div class="ddMenu" role="listbox" tabindex="-1">
+              <div class="ddItem active" role="option" data-value="Finished walls">Finished walls</div>
+              <div class="ddItem" role="option" data-value="Unfinished walls">Unfinished walls</div>
+            </div>
+          </div>
+          <input type="hidden" id="sg_walls" value="Finished walls" />
         </div>
-        <div>
+
+        <div class="field">
           <label>Timeline</label>
-          <select id="sg_timeline">
-            <option>1–3 months</option>
-            <option>3–6 months</option>
-            <option>Flexible</option>
-          </select>
+          <div class="dd" data-dd="timeline">
+            <button class="ddBtn" type="button" aria-haspopup="listbox" aria-expanded="false">
+              <span class="ddLabel">1–3 months</span>
+              <span class="ddChevron">▾</span>
+            </button>
+            <div class="ddMenu" role="listbox" tabindex="-1">
+              <div class="ddItem" role="option" data-value="ASAP (0–2 weeks)">ASAP (0–2 weeks)</div>
+              <div class="ddItem active" role="option" data-value="1–3 months">1–3 months</div>
+              <div class="ddItem" role="option" data-value="3–6 months">3–6 months</div>
+              <div class="ddItem" role="option" data-value="6+ months">6+ months</div>
+              <div class="ddItem" role="option" data-value="Not sure">Not sure</div>
+            </div>
+          </div>
+          <input type="hidden" id="sg_timeline" value="1–3 months" />
         </div>
       </div>
 
-      <div class="fieldRow">
-        <div>
+      <div class="grid2">
+        <div class="field">
           <label>Build standard</label>
-          <select id="sg_standard">
-            <option>Basic</option>
-            <option selected>Standard (most common)</option>
-            <option>Premium</option>
-          </select>
+          <div class="dd" data-dd="standard">
+            <button class="ddBtn" type="button" aria-haspopup="listbox" aria-expanded="false">
+              <span class="ddLabel">Standard (most common)</span>
+              <span class="ddChevron">▾</span>
+            </button>
+            <div class="ddMenu" role="listbox" tabindex="-1">
+              <div class="ddItem" role="option" data-value="Basic (budget)">Basic (budget)</div>
+              <div class="ddItem active" role="option" data-value="Standard (most common)">Standard (most common)</div>
+              <div class="ddItem" role="option" data-value="Premium (high-end)">Premium (high-end)</div>
+            </div>
+          </div>
+          <input type="hidden" id="sg_standard" value="Standard (most common)" />
         </div>
-        <div>
-          <label>Extras</label>
-          <select id="sg_extras">
-            <option>None</option>
-            <option>Pot lights</option>
-            <option>Kitchen rough-in</option>
-            <option>Separate entrance</option>
-            <option>Panel/service upgrade needed</option>
-          </select>
-        </div>
-      </div>
 
-      <div class="fieldRow">
-        <div>
-          <label>Number of bathrooms</label>
-          <input id="sg_bathrooms" type="number" min="0" value="0" />
-        </div>
-        <div>
-          <label>Number of bedrooms</label>
-          <input id="sg_bedrooms" type="number" min="0" value="0" />
+        <div class="field">
+          <label for="sg_bath">Number of bathrooms</label>
+          <input id="sg_bath" type="number" min="0" step="1" placeholder="0" />
         </div>
       </div>
 
-      <div>
-        <label>Describe the job (optional)</label>
-        <textarea id="sg_notes" rows="3" placeholder="Example: 900 sq ft basement finish, 2 bedrooms, 1 bathroom rough-in, 12 pot lights, 2 new circuits."></textarea>
-      </div>
-
-      <div class="hint">This is a budget range for pre-qualification. Final quote requires a site visit.</div>
-
-      <button class="sgBtn" type="button" id="sg_estimate">Get Estimate</button>
-
-      <div class="rangeBox" id="sg_rangeBox">
-        <div class="rangeTop">
-          <b>Estimated Range</b>
-          <small id="sg_drivers">Drivers included</small>
+      <div class="grid2">
+        <div class="field">
+          <label for="sg_bed">Number of bedrooms</label>
+          <input id="sg_bed" type="number" min="0" step="1" placeholder="0" />
         </div>
-        <div class="rangeNum" id="sg_rangeText">$0 – $0</div>
+        <div class="field">
+          <label for="sg_dummy"> </label>
+          <div class="hint">This is a budget range for pre-qualification. Final quote requires a site visit.</div>
+        </div>
       </div>
 
-      <div class="error" id="sg_error"></div>
-      <div class="ok" id="sg_ok"></div>
+      <div class="field">
+        <label for="sg_notes">Describe the job (optional)</label>
+        <textarea id="sg_notes" placeholder="Example: 900 sq ft basement finish, 2 bedrooms, 1 bathroom rough-in, 12 pot lights, 2 new circuits."></textarea>
+      </div>
 
-      <button class="sgBtn" type="button" id="sg_confirm" style="display:none;">Confirm & Send</button>
-      <button class="sgBtn secondary" type="button" id="sg_deny" style="display:none;">Not Interested</button>
+      <button class="btn btnPrimary btnWide" id="btnEstimate" type="button">Get Estimate</button>
+
+      <div class="rangeBox" id="rangeBox" style="display:none;">
+        <p class="rangeTitle">Estimated Range</p>
+        <p class="rangeValue" id="rangeValue">$0 — $0</p>
+        <div class="hint" style="margin-top:8px;">
+          By clicking confirm, your information is sent to the contractor who will be in touch shortly.
+        </div>
+
+        <div class="actions">
+          <button class="btn btnPrimary btnWide" id="btnConfirm" type="button">Confirm &amp; Send</button>
+          <button class="btn btnGhost btnWide" id="btnNope" type="button">Not Interested</button>
+        </div>
+
+        <div class="statusMsg" id="statusMsg"></div>
+      </div>
     </div>
-  </aside>
+  </div>
 
   <script>
-    // ====== CONFIG ======
-    const FORMSPREE_ENDPOINT = "https://formspree.io/f/xnjbanbn";
+    // ====== SET THIS ======
+    // Replace with your Formspree endpoint (the one that shows submissions in Formspree)
+    const FORMSPREE_ENDPOINT = "https://formspree.io/f/REPLACE_ME";
 
-    // ====== OPEN/CLOSE ======
-    const launchBtn = document.getElementById("sg-launch");
-    const panel = document.getElementById("sg-panel");
-    const closeBtn = document.getElementById("sg-close");
-    const openTop = document.getElementById("openWidgetTop");
+    // ====== Widget open/close ======
+    const panel = document.getElementById("widgetPanel");
+    const floatBtn = document.getElementById("floatBtn");
+    const openWidgetTop = document.getElementById("openWidgetTop");
+    const closeWidget = document.getElementById("closeWidget");
 
-    function openWidget(){
+    function openPanel(){
       panel.classList.add("open");
-      panel.setAttribute("aria-hidden","false");
+      panel.setAttribute("aria-hidden", "false");
     }
-    function closeWidget(){
+    function closePanel(){
       panel.classList.remove("open");
-      panel.setAttribute("aria-hidden","true");
+      panel.setAttribute("aria-hidden", "true");
     }
 
-    launchBtn.addEventListener("click", openWidget);
-    closeBtn.addEventListener("click", closeWidget);
-    openTop.addEventListener("click", openWidget);
+    floatBtn.addEventListener("click", openPanel);
+    openWidgetTop.addEventListener("click", openPanel);
+    closeWidget.addEventListener("click", closePanel);
 
-    // ====== ESTIMATE LOGIC (placeholder math; you’ll tune with your jman) ======
-    const $ = (id) => document.getElementById(id);
+    // Close if escape
+    document.addEventListener("keydown", (e) => {
+      if(e.key === "Escape") closePanel();
+    });
 
-    let lastEstimate = null;
+    // ====== Custom dropdowns (fixes white/blank menu) ======
+    function initDropdown(ddEl, hiddenInputId){
+      const btn = ddEl.querySelector(".ddBtn");
+      const label = ddEl.querySelector(".ddLabel");
+      const menu = ddEl.querySelector(".ddMenu");
+      const items = Array.from(ddEl.querySelectorAll(".ddItem"));
+      const hidden = document.getElementById(hiddenInputId);
 
+      function setValue(val){
+        label.textContent = val;
+        hidden.value = val;
+        items.forEach(i => i.classList.toggle("active", i.dataset.value === val));
+      }
+
+      function open(){
+        ddEl.classList.add("open");
+        btn.setAttribute("aria-expanded","true");
+      }
+      function close(){
+        ddEl.classList.remove("open");
+        btn.setAttribute("aria-expanded","false");
+      }
+      function toggle(){
+        ddEl.classList.contains("open") ? close() : open();
+      }
+
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        toggle();
+      });
+
+      items.forEach(item => {
+        item.addEventListener("click", () => {
+          setValue(item.dataset.value);
+          close();
+        });
+      });
+
+      // click outside closes
+      document.addEventListener("click", (e) => {
+        if(!ddEl.contains(e.target)) close();
+      });
+
+      // Initialize from hidden value (or first active)
+      const initial = hidden.value || (items.find(i => i.classList.contains("active"))?.dataset.value) || items[0].dataset.value;
+      setValue(initial);
+    }
+
+    initDropdown(document.querySelector('.dd[data-dd="ceiling"]'), "sg_ceiling");
+    initDropdown(document.querySelector('.dd[data-dd="walls"]'), "sg_walls");
+    initDropdown(document.querySelector('.dd[data-dd="timeline"]'), "sg_timeline");
+    initDropdown(document.querySelector('.dd[data-dd="standard"]'), "sg_standard");
+
+    // ====== Estimate logic (demo math you can tune tomorrow with your jman) ======
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
     function money(n){
-      return "$" + Math.round(n).toLocaleString();
+      return n.toLocaleString(undefined, { style:"currency", currency:"USD", maximumFractionDigits:0 });
     }
 
-    function showError(msg){
-      $("sg_error").style.display = "block";
-      $("sg_error").textContent = msg;
-      $("sg_ok").style.display = "none";
+    function calcRange(){
+      const size = parseFloat(document.getElementById("sg_size").value || "0");
+      const bath = parseInt(document.getElementById("sg_bath").value || "0", 10);
+      const bed  = parseInt(document.getElementById("sg_bed").value || "0", 10);
+
+      const ceiling = document.getElementById("sg_ceiling").value;
+      const walls = document.getElementById("sg_walls").value;
+      const standard = document.getElementById("sg_standard").value;
+      const timeline = document.getElementById("sg_timeline").value;
+
+      // Base cost per sqft (demo)
+      let basePerSqft = 12; // start point
+      if(walls.includes("Unfinished")) basePerSqft -= 2;
+
+      // Ceiling multipliers
+      let ceilingMult = 1.0;
+      if(ceiling.includes("Drywall")) ceilingMult = 1.10;
+      if(ceiling.includes("Drop"))   ceilingMult = 1.15;
+      if(ceiling.includes("Open"))   ceilingMult = 0.95;
+      if(ceiling.includes("Mixed"))  ceilingMult = 1.05;
+
+      // Build standard multiplier
+      let stdMult = 1.0;
+      if(standard.includes("Basic")) stdMult = 0.92;
+      if(standard.includes("Standard")) stdMult = 1.00;
+      if(standard.includes("Premium")) stdMult = 1.18;
+
+      // Timeline pressure (demo)
+      let timeMult = 1.0;
+      if(timeline.includes("ASAP")) timeMult = 1.10;
+
+      // Bathrooms/bedrooms adders (demo)
+      const bathAdd = bath * 900;
+      const bedAdd  = bed  * 250;
+
+      // Size sanity clamp
+      const sq = clamp(size || 0, 200, 4000);
+
+      const mid = (sq * basePerSqft) * ceilingMult * stdMult * timeMult + bathAdd + bedAdd;
+
+      const low = Math.round(mid * 0.85 / 50) * 50;
+      const high = Math.round(mid * 1.18 / 50) * 50;
+
+      return { low, high };
     }
-    function showOk(msg){
-      $("sg_ok").style.display = "block";
-      $("sg_ok").textContent = msg;
-      $("sg_error").style.display = "none";
-    }
 
-    $("sg_estimate").addEventListener("click", () => {
-      $("sg_error").style.display = "none";
-      $("sg_ok").style.display = "none";
+    const btnEstimate = document.getElementById("btnEstimate");
+    const rangeBox = document.getElementById("rangeBox");
+    const rangeValue = document.getElementById("rangeValue");
+    const statusMsg = document.getElementById("statusMsg");
 
-      const size = parseInt($("sg_size").value || "0", 10);
-      const baths = parseInt($("sg_bathrooms").value || "0", 10);
-      const beds  = parseInt($("sg_bedrooms").value || "0", 10);
-      const ceiling = $("sg_ceiling").value;
-      const walls = $("sg_walls").value;
-      const standard = $("sg_standard").value;
-      const extras = $("sg_extras").value;
-
-      if(size <= 0){
-        showError("Enter a basement size (sq ft) to generate a range.");
-        return;
-      }
-
-      // Base $/sqft assumption (placeholder)
-      let baseRate = 38;
-
-      // modifiers
-      if (walls.includes("Finished")) baseRate += 8;
-      if (ceiling.includes("Drywall")) baseRate += 5;
-      if (ceiling.includes("Drop")) baseRate += 2;
-      if (ceiling.includes("Open")) baseRate -= 2;
-
-      // standard factor
-      let factor = 1.0;
-      if (standard === "Basic") factor = 0.88;
-      if (standard.startsWith("Standard")) factor = 1.00;
-      if (standard === "Premium") factor = 1.22;
-
-      // rooms adders (very rough placeholders)
-      let add = (baths * 6500) + (beds * 1400);
-
-      // extras adders
-      if (extras.includes("Pot")) add += 1800;
-      if (extras.includes("Kitchen")) add += 2500;
-      if (extras.includes("Separate")) add += 1500;
-      if (extras.includes("Panel")) add += 3500;
-
-      const mid = (size * baseRate + add) * factor;
-
-      const low = mid * 0.88;
-      const high = mid * 1.14;
-
-      lastEstimate = { low: Math.round(low), high: Math.round(high) };
-
-      $("sg_rangeBox").style.display = "block";
-      $("sg_rangeText").textContent = `${money(low)} – ${money(high)}`;
-
-      // show buttons
-      $("sg_confirm").style.display = "block";
-      $("sg_deny").style.display = "block";
-
-      // drivers line
-      const drivers = [];
-      drivers.push(`${size} sq ft`);
-      drivers.push(`${beds} bed`);
-      drivers.push(`${baths} bath`);
-      drivers.push(standard);
-      $("sg_drivers").textContent = drivers.join(" • ");
+    btnEstimate.addEventListener("click", () => {
+      statusMsg.textContent = "";
+      const { low, high } = calcRange();
+      rangeValue.textContent = `${money(low)} — ${money(high)}`;
+      rangeBox.style.display = "block";
     });
 
-    // Not Interested = do nothing (just close)
-    $("sg_deny").addEventListener("click", () => {
-      closeWidget();
-    });
+    // ====== Confirm & Send ======
+    async function sendLead(){
+      const name = document.getElementById("sg_name").value.trim();
+      const email = document.getElementById("sg_email").value.trim();
+      const postal = document.getElementById("sg_postal").value.trim();
 
-    // ====== CONFIRM & SEND (Formspree) ======
-    $("sg_confirm").addEventListener("click", async () => {
-      $("sg_error").style.display = "none";
-      $("sg_ok").style.display = "none";
-
-      const email = $("sg_email").value.trim();
-      if(!email){
-        showError("Email is required to confirm & send.");
-        return;
-      }
-      if(!lastEstimate){
-        showError("Generate an estimate first, then confirm.");
+      if(!email || !email.includes("@")){
+        statusMsg.className = "statusMsg bad";
+        statusMsg.textContent = "Please enter a valid email before confirming.";
         return;
       }
 
-      const payload = new FormData();
-      payload.append("_subject", "ScopeGate CONFIRMED Quote");
-      payload.append("customer_email", email);
-      payload.append("name", $("sg_name").value.trim());
-      payload.append("postal", $("sg_postal").value.trim());
-      payload.append("basement_size_sqft", $("sg_size").value);
-      payload.append("ceiling_type", $("sg_ceiling").value);
-      payload.append("walls_finish", $("sg_walls").value);
-      payload.append("timeline", $("sg_timeline").value);
-      payload.append("build_standard", $("sg_standard").value);
-      payload.append("extras", $("sg_extras").value);
-      payload.append("bathrooms", $("sg_bathrooms").value);
-      payload.append("bedrooms", $("sg_bedrooms").value);
-      payload.append("notes", $("sg_notes").value.trim());
-      payload.append("estimate_low", money(lastEstimate.low));
-      payload.append("estimate_high", money(lastEstimate.high));
-      payload.append("estimate_range", `${money(lastEstimate.low)} – ${money(lastEstimate.high)}`);
-      payload.append("status", "confirmed");
+      const { low, high } = calcRange();
+
+      const payload = {
+        subject: "ScopeGate CONFIRMED Estimate",
+        customer_name: name || "(not provided)",
+        customer_email: email,
+        postal_code: postal || "(not provided)",
+        basement_size_sqft: document.getElementById("sg_size").value || "(not provided)",
+        ceiling_type: document.getElementById("sg_ceiling").value,
+        walls: document.getElementById("sg_walls").value,
+        timeline: document.getElementById("sg_timeline").value,
+        build_standard: document.getElementById("sg_standard").value,
+        bathrooms: document.getElementById("sg_bath").value || "0",
+        bedrooms: document.getElementById("sg_bed").value || "0",
+        notes: document.getElementById("sg_notes").value || "",
+        estimated_range: `${money(low)} — ${money(high)}`
+      };
+
+      if(FORMSPREE_ENDPOINT.includes("REPLACE_ME")){
+        statusMsg.className = "statusMsg bad";
+        statusMsg.textContent = "Formspree endpoint not set. Replace FORMSPREE_ENDPOINT in the code.";
+        return;
+      }
+
+      statusMsg.className = "statusMsg";
+      statusMsg.textContent = "Sending…";
 
       try{
         const res = await fetch(FORMSPREE_ENDPOINT, {
           method: "POST",
-          body: payload,
-          headers: { "Accept": "application/json" }
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
         });
 
         if(!res.ok){
-          throw new Error("Formspree rejected the submission.");
+          throw new Error("Non-200 response");
         }
 
-        showOk("Confirmed. Your information was sent to the contractor who will be in touch shortly.");
-        // optionally auto-close after a moment
-        setTimeout(closeWidget, 1400);
+        statusMsg.className = "statusMsg ok";
+        statusMsg.textContent = "Sent. The contractor will be in touch shortly.";
+
+        // Optional: close after a beat
+        setTimeout(() => closePanel(), 900);
+
       }catch(err){
-        showError("It generated fine, but the send failed. Check your Formspree form settings + email notifications.");
+        statusMsg.className = "statusMsg bad";
+        statusMsg.textContent = "Couldn’t send right now. Double-check the Formspree endpoint and try again.";
       }
+    }
+
+    document.getElementById("btnConfirm").addEventListener("click", sendLead);
+
+    // Not Interested = do nothing except close
+    document.getElementById("btnNope").addEventListener("click", () => {
+      statusMsg.textContent = "";
+      closePanel();
     });
   </script>
 </body>
